@@ -89,13 +89,8 @@ app.get('/', (req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Bootstrap & Listen when executed directly via `node app.js`
-const isDirectExecution = process.argv[1] && (
-  process.argv[1].endsWith('app.js') || 
-  process.argv[1].endsWith('app')
-) && process.env.NODE_ENV !== 'test';
-
-if (isDirectExecution) {
+// Bootstrap & Listen
+if (env.NODE_ENV !== 'test') {
   async function startServer() {
     try {
       console.log(`
