@@ -1,7 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
-import { demoBlogs } from "../data/site";
 
-export default function BlogGrid({ onOpen }) {
+export default function BlogGrid({ blogs = [], onOpen }) {
   return (
     <section className="blog-preview">
       <div className="blog-heading">
@@ -18,19 +17,24 @@ export default function BlogGrid({ onOpen }) {
         </button>
       </div>
       <div className="blog-grid">
-        {demoBlogs.map((blog) => (
-          <button className="blog-card" onClick={onOpen} key={blog.title}>
-            <img src={blog.image} alt={blog.imageAlt} />
+        {blogs.slice(0, 3).map((blog) => (
+          <button className="blog-card" onClick={onOpen} key={blog.slug}>
+            {blog.featured_image && (
+              <img src={blog.featured_image} alt={blog.title} />
+            )}
             <div>
               <span>{blog.category}</span>
               <h3>{blog.title}</h3>
-              <p>{blog.text}</p>
+              <p>{blog.excerpt}</p>
               <b>
                 Read article <ArrowUpRight size={16} />
               </b>
             </div>
           </button>
         ))}
+        {blogs.length === 0 && (
+          <p className="empty-content">New perspectives are coming soon.</p>
+        )}
       </div>
     </section>
   );

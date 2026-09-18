@@ -221,27 +221,3 @@ export const ecosystemPartners = [
     imageType: "logo",
   },
 ];
-
-export const demoBlogs = [
-  {
-    category: "Operations",
-    title: "How to frame a warehouse automation pilot that can scale",
-    text: "A practical way to focus the first workflow, establish measures and prepare the operation around it.",
-    image: "/media/images/addverb-travect.jpg",
-    imageAlt: "Addverb warehouse automation system",
-  },
-  {
-    category: "Field note",
-    title: "When computer vision should flag safety before an incident",
-    text: "How visual intelligence helps frontline teams spot high-risk conditions sooner and respond with context.",
-    image: "/media/images/thirdeye-pipe-leak-detection.jpg",
-    imageAlt: "Industrial gas pipeline being monitored for safety",
-  },
-  {
-    category: "Leadership",
-    title: "What document intelligence needs before it goes live",
-    text: "The governance, workflow ownership and data readiness questions leaders need answered before deployment.",
-    image: "/media/images/thirdeye-bfsi-document-analysis.jpg",
-    imageAlt: "Analyst reviewing business documents",
-  },
-];

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Plus } from "lucide-react";
+import { getPublishedBlogs } from "./api";
 import Header from "./components/Header";
 import Bridge from "./components/Bridge";
 import OfferingGrid from "./components/OfferingGrid";
 import BlogGrid from "./components/BlogGrid";
 import Contact from "./components/Contact";
 import {
-  demoBlogs,
   ecosystemPartners,
   faqs,
   industryCards,
@@ -53,7 +53,7 @@ function MediaPreview({
     </div>
   );
 }
-function Home({ setPage }) {
+function Home({ setPage, blogs }) {
   return (
     <>
       <section className="mv-hero">
@@ -123,7 +123,7 @@ function Home({ setPage }) {
       </section>
       <Bridge />
       <OfferingGrid />
-      <BlogGrid onOpen={() => setPage("insights")} />
+      <BlogGrid blogs={blogs} onOpen={() => setPage("insights")} />
       <section className="leasing-callout">
         <div className="lease-title">
           <span>ACCESS THE EQUIPMENT</span>
@@ -305,7 +305,7 @@ function LeasingPage() {
     </SimplePage>
   );
 }
-function Insights() {
+function Insights({ blogs = [] }) {
   return (
     <SimplePage
       label="BLOGS / PRACTICAL PERSPECTIVES"
@@ -318,15 +318,17 @@ function Insights() {
       }
     >
       <section className="articles">
-        {demoBlogs.map((blog, i) => (
-          <article className="article-card" key={blog.title}>
-            <img src={blog.image} alt={blog.imageAlt} />
+        {blogs.map((blog, i) => (
+          <article className="article-card" key={blog.slug}>
+            {blog.featured_image && (
+              <img src={blog.featured_image} alt={blog.title} />
+            )}
             <div>
               <span>
-                {blog.category} / 0{i + 1}
+                {blog.category} / {String(i + 1).padStart(2, "0")}
               </span>
               <h2>{blog.title}</h2>
-              <p>{blog.text}</p>
+              <p>{blog.excerpt}</p>
               <button>
                 Read article <ArrowUpRight size={16} />
               </button>
@@ -354,6 +356,22 @@ const pageFromPath = () =>
 
 export default function App() {
   const [page, setPage] = useState(pageFromPath);
+  const [blogs, setBlogs] = useState([]);
+  const [blogError, setBlogError] = useState("");
+  useEffect(() => {
+    let active = true;
+    getPublishedBlogs(100)
+      .then((items) => {
+        if (active) setBlogs(items || []);
+      })
+      .catch((error) => {
+        if (active) setBlogError(error.message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
   useEffect(() => {
     const handlePopState = () => setPage(pageFromPath());
     window.addEventListener("popstate", handlePopState);
@@ -367,11 +385,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const view = {
-    home: <Home setPage={navigate} />,
+    home: <Home setPage={navigate} blogs={blogs} />,
     industries: <IndustryPage />,
     ecosystem: <EcosystemPage />,
     leasing: <LeasingPage />,
-    insights: <Insights />,
+    insights: <Insights blogs={blogs} />,
     offerings: (
       <SimplePage
         label="OFFERINGS / TECHNOLOGY IN PRACTICE"
@@ -402,6 +420,11 @@ export default function App() {
   return (
     <>
       <Header page={page} setPage={navigate} />
+      {blogError && (
+        <div className="api-error" role="alert">
+          Blog content could not be loaded. {blogError}
+        </div>
+      )}
       {view[page] || view.home}
       <footer>
         <b>syntellos AI</b>
