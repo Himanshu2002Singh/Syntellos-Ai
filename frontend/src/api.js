@@ -1,0 +1,36 @@
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+
+async function request(path, options) {
+  let response;
+  try {
+    response = await fetch(apiBaseUrl + '/' + path.replace(/^\/+/, ''), options);
+  } catch {
+    throw new Error('The website service is unavailable. Please try again shortly.');
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error('The website service returned an unreadable response.');
+  }
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || 'The request could not be completed.');
+  }
+
+  return result;
+}
+
+export async function getPublishedBlogs(limit = 12) {
+  const result = await request('/blogs?limit=' + encodeURIComponent(limit));
+  return result.data.blogs;
+}
+
+export async function submitConsultationLead(lead) {
+  return request('/leads', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(lead),
+  });
+}
