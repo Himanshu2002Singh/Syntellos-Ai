@@ -1851,3 +1851,58 @@ footer {
     min-height: 250px;
   }
 }
+
+.api-error,
+.contact-status {
+  padding: 14px 18px;
+  font-size: 0.9rem;
+}
+.api-error {
+  background: #fff3e0;
+  color: #713c00;
+}
+.contact-status p {
+  margin: 0;
+}
+.contact-status.error {
+  background: #fff0ef;
+  color: #8a231b;
+}
+.contact-status.success {
+  background: #edf8ee;
+  color: #1f5b2b;
+}
+.whatsapp-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #14652a;
+  font-weight: 800;
+  text-decoration: underline;
+}
+.contact form button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.empty-content {
+  padding: 2rem;
+  color: #64707a;
+}
+.contact-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.contact form .whatsapp-submit {
+  background: #25d366;
+  color: #102016;
+  text-align: left;
+}
+.contact form .whatsapp-submit:hover {
+  background: #1da851;
+  color: #fff;
+}
+@media (max-width: 600px) {
+  .contact-actions {
+    grid-template-columns: 1fr;
+  }
+}
