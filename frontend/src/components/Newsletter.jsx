@@ -24,16 +24,17 @@ export default function Newsletter() {
   }
 
   return (
-    <section className="newsletter">
+    <section className="newsletter" aria-labelledby="newsletter-title">
       <div>
         <span>SYNTELLOS AI JOURNAL</span>
-        <h2>Technology insights,<br /><i>without the noise.</i></h2>
-        <p>Occasional practical notes on AI, IoT, robotics, XR and technology delivery in India.</p>
+        <h2 id="newsletter-title">Technology insights,<br /><i>without the noise.</i></h2>
+        <p>Get new Syntellos AI articles plus occasional field notes on AI, IoT, robotics, XR and technology delivery in India.</p>
+        <small>New posts + occasional newsletters. Unsubscribe at any time.</small>
       </div>
       <form onSubmit={subscribe}>
         <label>Name<input name="name" required autoComplete="name" placeholder="Your name" /></label>
-        <label>Work email<input name="email" required type="email" autoComplete="email" placeholder="you@company.com" /></label>
-        <button type="submit" disabled={sending}>{sending ? "Subscribing..." : <>Subscribe <ArrowUpRight size={18} /></>}</button>
+        <label>Email<input name="email" required type="email" autoComplete="email" placeholder="you@company.com" /></label>
+        <button type="submit" disabled={sending}>{sending ? "Subscribing..." : <>Subscribe to the journal <ArrowUpRight size={18} /></>}</button>
         {status && <p className={`newsletter-status ${status.type}`} role="status">{status.text}</p>}
       </form>
     </section>

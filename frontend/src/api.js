@@ -27,6 +27,11 @@ export async function getPublishedBlogs(limit = 12) {
   return result.data.blogs;
 }
 
+export async function getPublishedBlogBySlug(slug) {
+  const result = await request('/blogs/slug/' + encodeURIComponent(slug));
+  return result.data;
+}
+
 export async function submitConsultationLead(lead) {
   return request('/leads', {
     method: 'POST',
@@ -43,6 +48,13 @@ export async function subscribeToNewsletter(subscriber) {
   });
 }
 
+export async function unsubscribeFromNewsletter({ token, email }) {
+  const params = new URLSearchParams();
+  if (token) params.set('token', token);
+  if (email) params.set('email', email);
+  return request('/newsletter/unsubscribe?' + params.toString());
+}
+
 export async function adminRequest(path, token, options = {}) {
   return request(path, {
     ...options,
@@ -51,6 +63,15 @@ export async function adminRequest(path, token, options = {}) {
       Authorization: `Bearer ${token}`,
       ...(options.headers || {}),
     },
+  });
+}
+export async function adminUpload(path, token, formData) {
+  return request(path, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
   });
 }
 

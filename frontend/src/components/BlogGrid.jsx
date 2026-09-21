@@ -1,25 +1,29 @@
 import { ArrowUpRight } from "lucide-react";
 
-export default function BlogGrid({ blogs = [], fallback = [], onOpen }) {
+export default function BlogGrid({ blogs = [], fallback = [], onViewAll, onOpenPost }) {
   const cards = blogs.length ? blogs : fallback;
   return (
     <section className="blog-preview">
       <div className="blog-heading">
         <div>
-        <span>INSIGHTS AND UPDATES</span>
+          <span>INSIGHTS AND UPDATES</span>
           <h2>
-          Industry insights
+            Industry insights
             <br />
-          <i>for business and technology teams.</i>
+            <i>for business and technology teams.</i>
           </h2>
         </div>
-        <button onClick={onOpen}>
+        <button onClick={onViewAll}>
           View all blogs <ArrowUpRight size={18} />
         </button>
       </div>
       <div className="blog-grid">
         {cards.slice(0, 3).map((blog) => (
-          <button className="blog-card" onClick={onOpen} key={blog.slug || blog.title}>
+          <button
+            className="blog-card"
+            onClick={() => blog.slug ? onOpenPost?.(blog) : onViewAll?.()}
+            key={blog.slug || blog.title}
+          >
             {(blog.featured_image || blog.image) && (
               <img src={blog.featured_image || blog.image} alt={blog.title} />
             )}

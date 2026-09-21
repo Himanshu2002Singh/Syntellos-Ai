@@ -8,6 +8,8 @@ import BlogGrid from "./components/BlogGrid";
 import Contact from "./components/Contact";
 import Newsletter from "./components/Newsletter";
 import AdminPanel from "./components/AdminPanel";
+import BlogDetail from "./components/BlogDetail";
+import UnsubscribePage from "./components/UnsubscribePage";
 import {
   ecosystemPartners,
   audiencePaths,
@@ -63,7 +65,7 @@ function MediaPreview({
     </div>
   );
 }
-function Home({ setPage, blogs }) {
+function Home({ setPage, blogs, openBlog }) {
   return (
     <>
       <section className="mv-hero">
@@ -192,7 +194,13 @@ function Home({ setPage, blogs }) {
           ))}
         </div>
       </section>
-      <BlogGrid blogs={blogs} fallback={insightArticles} onOpen={() => setPage("insights")} />
+      <BlogGrid
+        blogs={blogs}
+        fallback={insightArticles}
+        onViewAll={() => setPage("insights")}
+        onOpenPost={(blog) => openBlog(blog.slug)}
+      />
+      <Newsletter />
       <section className="leasing-callout">
         <div className="lease-title">
           <span>EQUIPMENT LEASING</span>
@@ -221,7 +229,6 @@ function Home({ setPage, blogs }) {
         </div>
       </section>
       <Faqs />
-      <Newsletter />
       <Contact />
     </>
   );
@@ -417,7 +424,7 @@ function LeasingPage({ setPage }) {
     </SimplePage>
   );
 }
-function Insights({ blogs = [] }) {
+function Insights({ blogs = [], openBlog }) {
   const articles = blogs.length ? blogs : insightArticles;
   return (
     <SimplePage
@@ -443,11 +450,18 @@ function Insights({ blogs = [] }) {
               </span>
               <h2>{blog.title}</h2>
               <p>{blog.excerpt || blog.text}</p>
-              <p className="article-note">Talk to our team to explore this for your organisation.</p>
+              {blog.slug ? (
+                <button onClick={() => openBlog(blog.slug)}>
+                  Read full article <ArrowUpRight size={16} />
+                </button>
+              ) : (
+                <p className="article-note">Editorial brief from Syntellos AI.</p>
+              )}
             </div>
           </article>
         ))}
       </section>
+      <Newsletter />
     </SimplePage>
   );
 }
@@ -563,12 +577,18 @@ const routeByPage = {
   admin: "/admin",
 };
 const pageFromPath = () => {
-  if (window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")) {
-    return "admin";
-  }
+  const path = window.location.pathname;
+  if (path === "/admin" || path.startsWith("/admin/")) return "admin";
+  if (path === "/newsletter/unsubscribe") return "unsubscribe";
+  if (/^\/blogs\/[^/]+$/.test(path)) return "blog";
   return Object.entries(routeByPage).find(
-    ([, path]) => path === window.location.pathname,
+    ([, routePath]) => routePath === path,
   )?.[0] || "home";
+};
+
+const blogSlugFromPath = () => {
+  const match = window.location.pathname.match(/^\/blogs\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]) : "";
 };
 
 export default function App() {
@@ -601,6 +621,16 @@ export default function App() {
     setPage(next);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
+  const navigateBlog = (slug) => {
+    if (!slug) {
+      navigate("insights");
+      return;
+    }
+    const path = `/blogs/${encodeURIComponent(slug)}`;
+    if (window.location.pathname !== path) window.history.pushState({}, "", path);
+    setPage("blog");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
   const navigateToOffering = (index) => {
     const path = routeByPage.offerings;
     if (window.location.pathname !== path)
@@ -624,11 +654,13 @@ export default function App() {
     else navigate(next);
   };
   const view = {
-    home: <Home setPage={navigateFromHome} blogs={blogs} />,
+    home: <Home setPage={navigateFromHome} blogs={blogs} openBlog={navigateBlog} />,
     industries: <IndustryPage setPage={navigate} />,
     ecosystem: <EcosystemPage onPartner={navigatePartner} />,
     leasing: <LeasingPage setPage={navigate} />,
-    insights: <Insights blogs={blogs} />,
+    insights: <Insights blogs={blogs} openBlog={navigateBlog} />,
+    blog: <BlogDetail slug={blogSlugFromPath()} onBack={() => navigate("insights")} onOpen={navigateBlog} />,
+    unsubscribe: <UnsubscribePage onBack={() => navigate("insights")} />,
     offerings: <OfferingsPage setPage={navigate} />,
     contact: (
       <SimplePage
@@ -647,7 +679,7 @@ export default function App() {
   return (
     <>
       {page !== "admin" && <Header page={page} setPage={navigate} onPartner={navigatePartner} />}
-      {blogError && page === "insights" && blogs.length > 0 && (
+      {blogError && page === "insights" && (
         <div className="api-error" role="alert">
           Blog content could not be loaded. {blogError}
         </div>
