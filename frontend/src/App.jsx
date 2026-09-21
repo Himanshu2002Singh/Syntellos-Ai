@@ -6,11 +6,21 @@ import Bridge from "./components/Bridge";
 import OfferingGrid from "./components/OfferingGrid";
 import BlogGrid from "./components/BlogGrid";
 import Contact from "./components/Contact";
+import Newsletter from "./components/Newsletter";
+import AdminPanel from "./components/AdminPanel";
 import {
   ecosystemPartners,
+  audiencePaths,
   faqs,
   industryCards,
+  leasingBenefits,
   leasingOptions,
+  offerings,
+  proofPoints,
+  differentiators,
+  deliverySteps,
+  partnerSteps,
+  insightArticles,
 } from "./data/site";
 
 function MediaPreview({
@@ -59,8 +69,8 @@ function Home({ setPage, blogs }) {
       <section className="mv-hero">
         <img
           className="mv-hero-fallback"
-          src="/media/images/realwear-home-hero.png"
-          alt="Technician using a wearable device beside an industrial robot"
+          src="/media/images/stock-robotics-poster.jpg"
+          alt="Industrial robotic arm operating in a modern factory"
         />
         <video
           className="mv-hero-video"
@@ -69,26 +79,26 @@ function Home({ setPage, blogs }) {
           muted
           playsInline
           preload="auto"
-          poster="/media/images/realwear-home-hero.png"
+          poster="/media/images/stock-robotics-poster.jpg"
           aria-hidden="true"
         >
           <source
-            src="/media/videos/addverb-physical-ai-hero.mp4"
+            src="/media/videos/stock-robotics.mp4"
             type="video/mp4"
           />
         </video>
         <div className="mv-hero-shade" />
         <div className="mv-hero-copy">
-          <span>INDIA GTM · DELIVERY · EQUIPMENT ACCESS</span>
+          <span>INDIA GTM & DELIVERY · AI · IoT · ROBOTICS · XR</span>
           <h1>
-            Technology that
+            Silicon Valley AI engineering,
             <br />
-            moves <em>business forward.</em>
+            <em>built for Indian enterprise.</em>
           </h1>
           <p>
-            Syntellos helps Indian enterprises and institutions evaluate, access
-            and deploy AI, robotics, XR and connected technology with the right
-            global ecosystem around them.
+            Syntellos AI brings production-ready AI, computer vision, robotics,
+            IoT and XR capability to Indian enterprises and institutions—with
+            local strategy, on-ground delivery and a practical path to production.
           </p>
           <button onClick={() => setPage("contact")}>
             Talk to us <ArrowUpRight size={19} />
@@ -96,16 +106,42 @@ function Home({ setPage, blogs }) {
         </div>
       </section>
       <div className="announcement">
-        We connect global technology with Indian enterprise delivery, equipment
-        access and practical enablement.
+        One accountable India-based team from use-case definition to deployment,
+        training and scale.
       </div>
+      <section className="pathfinder">
+        <div className="pathfinder-heading">
+          <span>FIND THE RIGHT SERVICE</span>
+          <h2>What do you need help with?</h2>
+          <p>Choose the option that best matches your organisation and the service you need.</p>
+        </div>
+        <div className="pathfinder-grid">
+          {audiencePaths.map((path, index) => (
+            <button onClick={() => setPage(path.page)} key={path.title}>
+              <span>{String(index + 1).padStart(2, "0")} / {path.eyebrow}</span>
+              <h3>{path.title}</h3>
+              <p>{path.text}</p>
+              <b>{path.action} <ArrowUpRight size={16} /></b>
+            </button>
+          ))}
+        </div>
+      </section>
+      <section className="proof-strip" aria-label="Syntellos AI proof points">
+        {proofPoints.map((item) => (
+          <div key={item.value + item.label}>
+            <strong>{item.value}</strong>
+            {item.suffix && <b>{item.suffix}</b>}
+            <span>{item.label}</span>
+          </div>
+        ))}
+      </section>
       <section className="mv-intro">
         <div>
-          <span>WHY SYNTELLOS</span>
+          <span>WHAT WE DO</span>
           <h2>
-            One partner.
+            We help you choose,
             <br />
-            <i>More ways to move.</i>
+            <i>deploy and use technology.</i>
           </h2>
         </div>
         <div className="intro-side">
@@ -115,37 +151,59 @@ function Home({ setPage, blogs }) {
             video="/media/videos/pico-mixed-reality-workflow.mp4"
           />
           <p>
-            From an early use case through partner evaluation, deployment,
-            training and commercial access, we bring the moving pieces together
-            in one clear conversation.
+            We start with your business or learning need, recommend the right
+            technology, coordinate delivery and help your team use it well.
           </p>
         </div>
       </section>
       <Bridge />
-      <OfferingGrid />
-      <BlogGrid blogs={blogs} onOpen={() => setPage("insights")} />
+      <OfferingGrid onExplore={() => setPage("offerings")} />
+      <section className="difference-section">
+        <div className="difference-heading">
+          <span>WHY WORK WITH SYNTELLOS AI</span>
+          <h2>
+            A clear route from
+            <br />
+            <i>idea to implementation.</i>
+          </h2>
+          <p>
+            We combine local business understanding with specialist technology
+            partners, so you have one team to guide the work from scoping to rollout.
+          </p>
+        </div>
+        <div className="difference-list">
+          {differentiators.map((item, index) => (
+            <article key={item.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <BlogGrid blogs={blogs} fallback={insightArticles} onOpen={() => setPage("insights")} />
       <section className="leasing-callout">
         <div className="lease-title">
-          <span>ACCESS THE EQUIPMENT</span>
+          <span>EQUIPMENT LEASING</span>
           <h2>
-            Run the pilot.
+            Access the equipment
             <br />
-            Lease the hardware.
-            <br />
-            <i>Keep the momentum.</i>
+            <i>your project needs.</i>
           </h2>
           <button onClick={() => setPage("leasing")}>
-            Explore equipment access <ArrowUpRight size={18} />
+            View equipment options <ArrowUpRight size={18} />
           </button>
         </div>
         <div className="lease-side">
           <MediaPreview
             description="Automation equipment operating in a warehouse"
-            image="/media/images/addverb-travect.jpg"
-            video="/media/videos/addverb-amr-demo.mp4"
-            videoPosition="right center"
-            videoZoom={2.4}
-            videoOrigin="right center"
+            image="/media/images/stock-robotics-poster.jpg"
+            video="/media/videos/stock-robotics.mp4"
+            videoPosition="center"
+            videoZoom={1.25}
+            videoOrigin="center"
           />
           <p>
             Robotics, GPUs, XR systems, cameras and edge equipment, shaped
@@ -154,6 +212,7 @@ function Home({ setPage, blogs }) {
         </div>
       </section>
       <Faqs />
+      <Newsletter />
       <Contact />
     </>
   );
@@ -164,11 +223,11 @@ function Faqs() {
   return (
     <section className="faqs">
       <div>
-        <span className="section-label">04 / FAQ</span>
+        <span className="section-label">FREQUENTLY ASKED QUESTIONS</span>
         <h2>
-          The important questions,
+          Questions about our
           <br />
-          <i>answered clearly.</i>
+          <i>services and delivery.</i>
         </h2>
       </div>
       <div>
@@ -186,29 +245,50 @@ function Faqs() {
   );
 }
 
-function SimplePage({ title, label, children }) {
+function SimplePage({ title, label, description, children }) {
   return (
     <main className="page">
       <div className="page-intro">
         <span>{label}</span>
         <h1>{title}</h1>
+        {description && <p>{description}</p>}
       </div>
       {children}
       <Contact />
     </main>
   );
 }
-function IndustryPage() {
+function Steps({ title, text, steps }) {
+  return (
+    <section className="content-steps">
+      <div>
+        <span>HOW IT WORKS</span>
+        <h2>{title}</h2>
+        <p>{text}</p>
+      </div>
+      <div className="content-step-list">
+        {steps.map((step) => (
+          <article key={step.number}>
+            <span>{step.number}</span>
+            <div><h3>{step.title}</h3><p>{step.text}</p></div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+function IndustryPage({ setPage }) {
   return (
     <SimplePage
-      label="INDUSTRIES / CONTEXT FIRST"
+      label="INDUSTRIES WE SERVE"
       title={
         <>
-          Different work.
+          Technology solutions for
           <br />
-          <i>Different technology path.</i>
+          <i>your industry.</i>
         </>
       }
+      description="We begin with the work your teams need to improve, then match the right AI, IoT, robotics or XR solution to that setting."
     >
       <section className="industry-grid">
         {industryCards.map((industry, i) => (
@@ -218,29 +298,36 @@ function IndustryPage() {
               <span>0{i + 1}</span>
               <h2>{industry.name}</h2>
               <p>{industry.text}</p>
-              <button>
-                See relevant capabilities <ArrowUpRight size={16} />
+              <ul className="card-use-cases">
+                {industry.useCases.map((useCase) => <li key={useCase}>{useCase}</li>)}
+              </ul>
+              <button onClick={() => setPage("offerings")}>
+                View relevant services <ArrowUpRight size={16} />
               </button>
             </div>
           </article>
         ))}
       </section>
+      <Steps title="Start with a use case your team can measure." text="A good first project solves a visible problem, has an owner and gives the team a clear way to judge whether it worked." steps={deliverySteps} />
     </SimplePage>
   );
 }
-function EcosystemPage() {
+function EcosystemPage({ onPartner }) {
   return (
     <SimplePage
-      label="ECOSYSTEM / CONNECTED DELIVERY"
+      label="PARTNERS AND DELIVERY"
       title={
         <>
-          The right people
+          Work with one India-based
           <br />
-          <i>on the same side.</i>
+          <i>technology partner.</i>
         </>
       }
+      description="For global technology providers, Syntellos AI provides local go-to-market support, enterprise access and delivery coordination in India."
     >
       <Bridge />
+      <Steps title="A straightforward route into the Indian market." text="We focus on a clear customer fit and a practical first opportunity before expanding the partnership." steps={partnerSteps} />
+      <div className="page-action"><button onClick={onPartner}>Register as a partner <ArrowUpRight size={18} /></button></div>
       <section className="partner-list">
         {ecosystemPartners.map((partner, i) => {
           const cardClassName =
@@ -249,7 +336,7 @@ function EcosystemPage() {
               : "partner-card";
 
           return (
-            <button className={cardClassName} key={partner.name}>
+            <article className={cardClassName} key={partner.name}>
               <div className="partner-media">
                 <img src={partner.image} alt={partner.imageAlt} />
                 {partner.logo && (
@@ -268,25 +355,40 @@ function EcosystemPage() {
                 <p>{partner.text}</p>
                 <ArrowUpRight size={20} />
               </div>
-            </button>
+            </article>
           );
         })}
       </section>
     </SimplePage>
   );
 }
-function LeasingPage() {
+function LeasingPage({ setPage }) {
   return (
     <SimplePage
-      label="LEASING / EQUIPMENT ACCESS"
+      label="EQUIPMENT LEASING"
       title={
         <>
-          Ambition moves faster
+          Lease technology equipment
           <br />
-          <i>with room to test.</i>
+          <i>for pilots and rollouts.</i>
         </>
       }
+      description="Access the technology your project needs without committing to a full purchase before the value is proven."
     >
+      <section className="leasing-overview">
+        <div>
+          <span>FLEXIBLE ACCESS / LOWER UPFRONT COMMITMENT</span>
+          <h2>Convert a large equipment decision into a staged deployment.</h2>
+          <p>
+            Access structures can be explored for GPUs, robotics, XR headsets,
+            camera arrays and edge servers so a pilot can prove value before a
+            wider capital commitment.
+          </p>
+        </div>
+        <ul>
+          {leasingBenefits.map((benefit) => <li key={benefit}>{benefit}</li>)}
+        </ul>
+      </section>
       <section className="lease-list">
         {leasingOptions.map((option, i) => (
           <article key={option.title}>
@@ -295,9 +397,44 @@ function LeasingPage() {
               <span>0{i + 1}</span>
               <h2>{option.title}</h2>
               <p>{option.text}</p>
-              <button>
+              <button onClick={() => setPage("contact")}>
                 Discuss availability <ArrowUpRight size={16} />
               </button>
+            </div>
+          </article>
+        ))}
+      </section>
+      <Steps title="Use equipment when your project needs it." text="We help you explore availability and commercial options for a focused pilot, a temporary requirement or a wider deployment." steps={deliverySteps} />
+    </SimplePage>
+  );
+}
+function Insights({ blogs = [] }) {
+  const articles = blogs.length ? blogs : insightArticles;
+  return (
+    <SimplePage
+      label="INSIGHTS"
+      title={
+        <>
+          Practical guides for
+          <br />
+          <i>technology teams.</i>
+        </>
+      }
+      description="Useful starting points for leaders and teams exploring AI, IoT, robotics, XR, training and operational technology projects."
+    >
+      <section className="articles">
+        {articles.map((blog, i) => (
+          <article className="article-card" key={blog.slug || blog.title}>
+            {(blog.featured_image || blog.image) && (
+              <img src={blog.featured_image || blog.image} alt={blog.title} />
+            )}
+            <div>
+              <span>
+                {blog.category} / {String(i + 1).padStart(2, "0")}
+              </span>
+              <h2>{blog.title}</h2>
+              <p>{blog.excerpt || blog.text}</p>
+              <p className="article-note">Talk to our team to explore this for your organisation.</p>
             </div>
           </article>
         ))}
@@ -305,38 +442,82 @@ function LeasingPage() {
     </SimplePage>
   );
 }
-function Insights({ blogs = [] }) {
+
+function OfferingsPage({ setPage }) {
   return (
-    <SimplePage
-      label="BLOGS / PRACTICAL PERSPECTIVES"
-      title={
-        <>
-          Ideas for teams
+    <main className="page offerings-page">
+      <section className="offerings-hero">
+        <span>SOLUTIONS & SERVICES</span>
+        <h1>
+          Technology services for
           <br />
-          <i>that have to deliver.</i>
-        </>
-      }
-    >
-      <section className="articles">
-        {blogs.map((blog, i) => (
-          <article className="article-card" key={blog.slug}>
-            {blog.featured_image && (
-              <img src={blog.featured_image} alt={blog.title} />
-            )}
-            <div>
-              <span>
-                {blog.category} / {String(i + 1).padStart(2, "0")}
-              </span>
-              <h2>{blog.title}</h2>
-              <p>{blog.excerpt}</p>
-              <button>
-                Read article <ArrowUpRight size={16} />
-              </button>
-            </div>
-          </article>
-        ))}
+          <i>enterprises and institutions.</i>
+        </h1>
+        <p>
+          Explore AI, IoT, robotics and XR services. We can support consulting,
+          implementation, training, labs and equipment access based on your needs.
+        </p>
       </section>
-    </SimplePage>
+      <Steps title="Use equipment when your project needs it." text="We help you explore availability and commercial options for a focused pilot, a temporary requirement or a wider deployment." steps={deliverySteps} />
+      <nav className="offering-jump" aria-label="Offering categories">
+        {offerings.map((offering, index) => (
+          <a href={`#offering-${index + 1}`} key={offering.title}>
+            <span>0{index + 1}</span>
+            {offering.shortTitle || offering.title}
+          </a>
+        ))}
+      </nav>
+      <section className="offering-detail-list">
+        {offerings.map((offering, index) => {
+          const Icon = offering.icon;
+          return (
+            <article id={`offering-${index + 1}`} key={offering.title}>
+              <div className="offering-detail-intro">
+                <span>0{index + 1} / {offering.group}</span>
+                <Icon size={32} aria-hidden="true" />
+                <h2>{offering.title}</h2>
+                <p>{offering.text}</p>
+                <button onClick={() => setPage("contact")}>
+                  Discuss this offering <ArrowUpRight size={17} />
+                </button>
+              </div>
+              <div className="offering-detail-content">
+                <div className="offering-visual">
+                  {index === 2 ? (
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      poster="/media/images/stock-robotics-poster.jpg"
+                      aria-label="Industrial automation system in operation"
+                    >
+                      <source
+                        src="/media/videos/stock-robotics.mp4"
+                        type="video/mp4"
+                      />
+                    </video>
+                  ) : (
+                    <img src={offering.image} alt={offering.imageAlt} />
+                  )}
+                  <span>{offering.group}</span>
+                </div>
+                <div className="offering-services">
+                  {offering.services.map((service) => (
+                    <div key={service.title}>
+                      <h3>{service.title}</h3>
+                      <p>{service.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+      <Contact />
+    </main>
   );
 }
 
@@ -348,11 +529,16 @@ const routeByPage = {
   leasing: "/leases",
   insights: "/blogs",
   contact: "/contact",
+  admin: "/admin",
 };
-const pageFromPath = () =>
-  Object.entries(routeByPage).find(
+const pageFromPath = () => {
+  if (window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")) {
+    return "admin";
+  }
+  return Object.entries(routeByPage).find(
     ([, path]) => path === window.location.pathname,
   )?.[0] || "home";
+};
 
 export default function App() {
   const [page, setPage] = useState(pageFromPath);
@@ -384,26 +570,22 @@ export default function App() {
     setPage(next);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
+  const navigatePartner = () => {
+    window.history.pushState({}, "", "/contact?intent=partner");
+    setPage("contact");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+  const navigateFromHome = (next) => {
+    if (next === "partner") navigatePartner();
+    else navigate(next);
+  };
   const view = {
-    home: <Home setPage={navigate} blogs={blogs} />,
-    industries: <IndustryPage />,
-    ecosystem: <EcosystemPage />,
-    leasing: <LeasingPage />,
+    home: <Home setPage={navigateFromHome} blogs={blogs} />,
+    industries: <IndustryPage setPage={navigate} />,
+    ecosystem: <EcosystemPage onPartner={navigatePartner} />,
+    leasing: <LeasingPage setPage={navigate} />,
     insights: <Insights blogs={blogs} />,
-    offerings: (
-      <SimplePage
-        label="OFFERINGS / TECHNOLOGY IN PRACTICE"
-        title={
-          <>
-            Capabilities that
-            <br />
-            <i>meet the moment.</i>
-          </>
-        }
-      >
-        <OfferingGrid />
-      </SimplePage>
-    ),
+    offerings: <OfferingsPage setPage={navigate} />,
     contact: (
       <SimplePage
         label="CONTACT / NEXT STEP"
@@ -416,21 +598,22 @@ export default function App() {
         }
       ></SimplePage>
     ),
+    admin: <AdminPanel onExit={() => navigate("home")} />,
   };
   return (
     <>
-      <Header page={page} setPage={navigate} />
-      {blogError && (
+      {page !== "admin" && <Header page={page} setPage={navigate} onPartner={navigatePartner} />}
+      {blogError && page === "insights" && blogs.length > 0 && (
         <div className="api-error" role="alert">
           Blog content could not be loaded. {blogError}
         </div>
       )}
       {view[page] || view.home}
-      <footer>
-        <b>syntellos AI</b>
+      {page !== "admin" && <footer>
+        <b>Syntellos AI</b>
         <span>Global technology. Local delivery. Practical access.</span>
         <small>© 2026 Syntellos AI</small>
-      </footer>
+      </footer>}
     </>
   );
 }
