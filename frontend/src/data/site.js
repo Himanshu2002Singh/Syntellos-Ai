@@ -10,30 +10,30 @@ export const offerings = [
     group: "Consulting, solutions & training",
     title: "Artificial Intelligence",
     shortTitle: "AI",
-    text: "AI strategy, education and production solutions that move organisations from interest to measurable use.",
+    text: "Every offering pairs Syntellos AI's on-ground go-to-market strategy with our ecosystem partners' engineering — so Indian enterprises get a local relationship and a globally proven build.",
     icon: BrainCircuit,
     image: "/media/images/thirdeye-genai-services.png",
     imageAlt: "Connected enterprise artificial intelligence system",
     services: [
       {
-        title: "Consulting & go-to-market",
-        text: "AI readiness, use-case roadmaps, product positioning and India go-to-market strategy.",
+        title: "AI Strategy & GTM Roadmaps",
+        text: "Market-entry strategy, product-market fit and launch plans for AI initiatives, tuned to Indian buyer cycles.",
       },
       {
-        title: "GenAI & agentic systems",
-        text: "Conversational assistants, document intelligence and autonomous workflow agents deployed around accountable business operations.",
+        title: "GenAI & Agentic AI Solutions",
+        text: "Conversational assistants, document intelligence and autonomous agents deployed on production infrastructure.",
       },
       {
-        title: "Computer vision intelligence",
-        text: "Inspection, counting, PPE compliance, perimeter safety and anomaly detection using existing CCTV and camera infrastructure where suitable.",
+        title: "Computer Vision Intelligence",
+        text: "Inspection, counting, safety and anomaly detection built on the CCTV and sensors you already run.",
       },
       {
-        title: "Predictive AI & analytics",
-        text: "Asset-health monitoring, forecasting models and decision-support systems validated against operational data.",
+        title: "Predictive AI & Forecasting",
+        text: "Asset health, maintenance and demand forecasting models validated against your own historical data.",
       },
       {
-        title: "AI labs & workforce upskilling",
-        text: "Turnkey campus labs, executive AI literacy, faculty enablement and hands-on engineering programmes for institutions and enterprise teams.",
+        title: "AI Upskilling & Workforce Training",
+        text: "Executive AI literacy, engineering training on LLMs and RLHF, and safe-usage programs for operational teams.",
       },
     ],
   },
@@ -128,10 +128,10 @@ export const leasingBenefits = [
 ];
 
 export const proofPoints = [
-  { value: "12+ yrs", label: "Go-to-market experience across AI, IoT and XR" },
-  { value: "20+", label: "Pre-built AI solutions available through the ecosystem" },
-  { value: "120–180", suffix: "days", label: "Typical path to production for proven solutions" },
-  { value: "7", label: "Industries actively served, from manufacturing to BFSI" },
+  { value: "10 Cr+", label: "India revenue target for AI & XR consulting, this year" },
+  { value: "3 Yrs", label: "Ecosystem partners building presence in the Indian market" },
+  { value: "7", label: "Industries actively served: manufacturing to BFSI" },
+  { value: "93%+", label: "Model accuracy benchmark, validated not just claimed" },
 ];
 
 export const audiencePaths = [
@@ -167,28 +167,32 @@ export const audiencePaths = [
 
 export const differentiators = [
   {
-    title: "Planning and delivery from one team",
-    text: "We help define the requirement, select the right technology, coordinate delivery and support your team after implementation.",
+    title: "A hybrid, not a reseller or a pure consultancy",
+    text: "12+ years of hands-on GTM expertise paired with an ecosystem engineering backbone — clients get market fit and a working system, not a software license or a strategy deck alone.",
   },
   {
-    title: "Use proven technology to save time",
-    text: "Where suitable, we adapt existing technology and engineering instead of starting from scratch, helping projects move faster.",
+    title: "Speed through pre-built systems, not from-scratch builds",
+    text: "120–180 day deployment because solutions are pre-engineered and production-tested elsewhere, then localized — not started from a blank page like most boutique AI shops.",
   },
   {
-    title: "India-based project support",
-    text: "Our local team understands Indian enterprise requirements, procurement processes and the support needed during a rollout.",
+    title: "India-first execution, not an outsourced afterthought",
+    text: "A dedicated India entity, an India-based relationship owner, and India-specific go-to-market strategy — not a regional sales rep for a foreign vendor with no local accountability.",
   },
   {
-    title: "One point of contact for multiple services",
-    text: "Talk to one team about AI, computer vision, IoT, robotics, XR, training and equipment access instead of coordinating multiple vendors.",
+    title: "Full-stack breadth through a single point of contact",
+    text: "GenAI, computer vision, predictive AI, upskilling, XR/IoT and equipment financing conversations all route through one relationship, instead of five vendors for one transformation.",
   },
   {
-    title: "Options for sensitive data",
-    text: "For projects with data or compliance requirements, we can evaluate on-premise and private-cloud deployment options during scoping.",
+    title: "Data sovereignty built in, not bolted on",
+    text: "On-premise and private-cloud deployment options address the compliance concerns — RBI, the DPDP Act, sector-specific norms — that stop many Indian enterprises from adopting AI at all.",
   },
   {
-    title: "Leasing and equipment access options",
-    text: "Explore project-based access and leasing for servers, GPUs, cameras, robotics and XR equipment before making a large upfront purchase.",
+    title: "A de-risked financing path",
+    text: "Equipment and technology leasing options mean AI adoption isn't gated by a large capex approval cycle — a structural advantage most AI-only vendors can't offer.",
+  },
+  {
+    title: "Sector-fluent, not generic",
+    text: "Industry-specific framing — shop-floor language for manufacturing, compliance language for BFSI — rather than one AI pitch reused across every vertical.",
   },
 ];
 

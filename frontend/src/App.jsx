@@ -89,25 +89,25 @@ function Home({ setPage, blogs }) {
         </video>
         <div className="mv-hero-shade" />
         <div className="mv-hero-copy">
-          <span>INDIA GTM & DELIVERY · AI · IoT · ROBOTICS · XR</span>
+          <span>INDIA GTM & DELIVERY PARTNER FOR AI ECOSYSTEM PARTNERS</span>
           <h1>
             Silicon Valley AI engineering,
             <br />
             <em>built for Indian enterprise.</em>
           </h1>
           <p>
-            Syntellos AI brings production-ready AI, computer vision, robotics,
-            IoT and XR capability to Indian enterprises and institutions—with
-            local strategy, on-ground delivery and a practical path to production.
+            Syntellos AI brings its ecosystem partners' production-ready GenAI,
+            computer vision, predictive AI and agentic AI systems to Indian
+            manufacturing, BFSI, energy and IT leaders — with local strategy,
+            local delivery, and a partner who has been on the ground for three years.
           </p>
           <button onClick={() => setPage("contact")}>
-            Talk to us <ArrowUpRight size={19} />
+            Talk to Our Team <ArrowUpRight size={19} />
           </button>
         </div>
       </section>
       <div className="announcement">
-        One accountable India-based team from use-case definition to deployment,
-        training and scale.
+        Backed by an ecosystem of engineering, cloud, XR and financing relationships.
       </div>
       <section className="pathfinder">
         <div className="pathfinder-heading">
@@ -137,7 +137,7 @@ function Home({ setPage, blogs }) {
       </section>
       <section className="mv-intro">
         <div>
-          <span>WHAT WE DO</span>
+          <span>WHAT WE DELIVER</span>
           <h2>
             We help you choose,
             <br />
@@ -151,8 +151,9 @@ function Home({ setPage, blogs }) {
             video="/media/videos/pico-mixed-reality-workflow.mp4"
           />
           <p>
-            We start with your business or learning need, recommend the right
-            technology, coordinate delivery and help your team use it well.
+            Every offering pairs Syntellos AI's on-ground go-to-market strategy
+            with our ecosystem partners' engineering — so Indian enterprises get
+            a local relationship and a globally proven build.
           </p>
         </div>
       </section>
@@ -160,15 +161,16 @@ function Home({ setPage, blogs }) {
       <OfferingGrid onExplore={() => setPage("offerings")} />
       <section className="difference-section">
         <div className="difference-heading">
-          <span>WHY WORK WITH SYNTELLOS AI</span>
+          <span>WHAT MAKES THIS OFFERING GENUINELY DIFFERENT</span>
           <h2>
-            A clear route from
+            What makes this offering
             <br />
-            <i>idea to implementation.</i>
+            <i>genuinely different.</i>
           </h2>
           <p>
-            We combine local business understanding with specialist technology
-            partners, so you have one team to guide the work from scoping to rollout.
+            Most AI vendors in India sell either software or strategy — rarely both,
+            and rarely with real local accountability. Here's where Syntellos AI's
+            positioning actually differs.
           </p>
         </div>
         <div className="difference-list">
@@ -223,11 +225,11 @@ function Faqs() {
   return (
     <section className="faqs">
       <div>
-        <span className="section-label">FREQUENTLY ASKED QUESTIONS</span>
+        <span className="section-label">FAQ</span>
         <h2>
-          Questions about our
+          Common questions from Indian
           <br />
-          <i>services and delivery.</i>
+          <i>enterprises.</i>
         </h2>
       </div>
       <div>

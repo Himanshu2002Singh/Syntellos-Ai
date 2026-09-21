@@ -91,16 +91,16 @@ export default function Contact() {
   return (
     <section className="contact">
       <div>
-        <span className="section-label">CONTACT US</span>
-        <h2>Talk to our team.</h2>
+        <span className="section-label">GET IN TOUCH</span>
+        <h2>Tell us the problem. We’ll map the right AI solution.</h2>
         <p>
-          Tell us what you need help with. We will review your requirement and
-          suggest the right next step.
+          Share your use case and our team — backed by our ecosystem partners’
+          engineering — responds with a clear next step.
         </p>
         <ol>
-          <li>Share your requirement</li>
-          <li>Choose the service you need</li>
-          <li>Get clear next steps</li>
+          <li>Share your use case</li>
+          <li>Get a transparent assessment</li>
+          <li>Move toward the right AI solution</li>
         </ol>
       </div>
       <form onSubmit={handleSubmit}>
