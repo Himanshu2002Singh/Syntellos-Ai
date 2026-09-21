@@ -1,32 +1,50 @@
-import { ArrowUpRight, Menu } from "lucide-react";
-export default function Header({ page, setPage }) {
+import { useState } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+export default function Header({ page, setPage, onPartner }) {
+  const [open, setOpen] = useState(false);
   const links = [
-    ["Blogs", "insights"],
+    ["Solutions", "offerings"],
     ["Industries", "industries"],
-    ["Ecosystem", "ecosystem"],
-    ["Leasing", "leasing"],
+    ["Equipment", "leasing"],
+    ["Partners", "ecosystem"],
+    ["Insights", "insights"],
   ];
+  const goTo = (key) => {
+    setPage(key);
+    setOpen(false);
+  };
   return (
     <header className="nav">
-      <button className="wordmark" onClick={() => setPage("home")}>
-        <span>syntellos</span>
+      <button
+        className="wordmark"
+        onClick={() => goTo("home")}
+        aria-label="Syntellos AI home"
+      >
+        <span>Syntellos</span>
         <b>AI</b>
       </button>
-      <nav>
+      <nav className={open ? "open" : ""} aria-label="Primary navigation">
         {links.map(([label, key]) => (
           <button
             className={page === key ? "on" : ""}
-            onClick={() => setPage(key)}
+            onClick={() => goTo(key)}
             key={key}
           >
             {label}
           </button>
         ))}
       </nav>
-      <button className="consult" onClick={() => setPage("contact")}>
-        Book consultation <ArrowUpRight size={16} />
+      <button className="consult" onClick={() => { onPartner(); setOpen(false); }}>
+        Register as a partner <ArrowUpRight size={16} />
       </button>
-      <Menu className="hamburger" />
+      <button
+        className="hamburger"
+        onClick={() => setOpen(!open)}
+        aria-label={open ? "Close navigation" : "Open navigation"}
+        aria-expanded={open}
+      >
+        {open ? <X /> : <Menu />}
+      </button>
     </header>
   );
 }

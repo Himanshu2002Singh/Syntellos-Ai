@@ -1,20 +1,20 @@
 import { ArrowUpRight } from "lucide-react";
 const panels = [
   [
-    "Global technology",
-    "Proven systems, specialist engineering and products with a role to play in India.",
-    "/media/images/addverb-dynamo.jpg",
-    "Warehouse automation systems",
+    "Global technology partners",
+    "Specialist AI, robotics, IoT and XR technology that can be adapted for Indian enterprise requirements.",
+    "/media/images/stock-robotics-poster.jpg",
+    "Unbranded industrial automation system",
   ],
   [
-    "Syntellos delivery",
-    "The local team that connects the brief, the partners, the deployment and the people using it.",
+    "Syntellos AI in India",
+    "We handle use-case scoping, local go-to-market, deployment coordination, training and ongoing customer support.",
     "/media/images/xterra-robot-01.webp",
     "Industrial automation system in operation",
   ],
   [
-    "Indian teams",
-    "Enterprise and institutional teams turning new capability into everyday momentum.",
+    "Your organisation",
+    "Enterprise teams, colleges and institutions that need technology to solve a real business, operations or learning problem.",
     "/media/images/realwear-frontline.jpg",
     "Frontline worker using a connected wearable device",
   ],
@@ -23,17 +23,16 @@ export default function Bridge() {
   return (
     <section className="ecosystem-feature">
       <div className="ecosystem-intro">
-        <span>01 / THE DELIVERY ECOSYSTEM</span>
+        <span>HOW WE WORK</span>
         <h2>
-          Technology travels
+          How we bring
           <br />
-          further with the
-          <br />
-          <i>right people around it.</i>
+          <i>technology to India.</i>
         </h2>
         <p>
-          We keep global innovation, local delivery and the people who will use
-          it in the same conversation.
+          Syntellos AI connects global technology providers with Indian
+          enterprises and institutions—from the first discussion through local
+          deployment, training and support.
         </p>
       </div>
       <div className="ecosystem-panels">
@@ -45,7 +44,7 @@ export default function Bridge() {
               <h3>{title}</h3>
               <p>{copy}</p>
               <b>
-                Explore the connection <ArrowUpRight size={16} />
+                How it works <ArrowUpRight size={16} />
               </b>
             </div>
           </button>

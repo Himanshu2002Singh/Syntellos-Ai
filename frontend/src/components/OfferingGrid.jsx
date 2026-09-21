@@ -1,18 +1,18 @@
 import { ArrowUpRight } from "lucide-react";
 import { offerings } from "../data/site";
-export default function OfferingGrid() {
+export default function OfferingGrid({ onExplore }) {
   return (
     <section className="offerings">
-      <div className="section-label">02 / WHAT WE PUT TO WORK</div>
+      <div className="section-label">OUR SERVICES</div>
       <div className="section-heading">
         <h2>
-          Technology for the
+          Technology services
           <br />
-          <i>work in front of you.</i>
+          <i>for your organisation.</i>
         </h2>
         <p>
-          Consulting, implementation and equipment access come together around a
-          real-world outcome.
+          Choose the technology area you need. Each service includes consulting,
+          solution design, implementation, training or equipment access as needed.
         </p>
       </div>
       <div className="offering-grid">
@@ -28,8 +28,8 @@ export default function OfferingGrid() {
                 <Icon size={25} />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
-                <button>
-                  Explore <ArrowUpRight size={17} />
+                <button onClick={onExplore}>
+                  View services <ArrowUpRight size={17} />
                 </button>
               </div>
             </article>
