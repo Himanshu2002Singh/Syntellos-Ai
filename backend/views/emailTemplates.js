@@ -1,5 +1,12 @@
 import { env } from '../config/env.js';
 
+function absoluteFrontendUrl(value = '') {
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  const base = env.FRONTEND_URL.replace(/\/+$/, '');
+  return `${base}/${String(value).replace(/^\/+/, '')}`;
+}
+
 const baseStyles = `
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
@@ -53,8 +60,9 @@ const btnStyles = `
 `;
 
 export function getNewBlogTemplate({ blog, unsubscribeUrl }) {
-  const blogUrl = `${env.FRONTEND_URL}/blogs/${blog.slug}`;
-  const banner = blog.featured_image ? `<img src="${blog.featured_image}" alt="${blog.title}" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: 6px; margin-bottom: 20px;" />` : '';
+  const blogUrl = `${env.FRONTEND_URL.replace(/\/+$/, '')}/blogs/${blog.slug}`;
+  const bannerUrl = absoluteFrontendUrl(blog.featured_image);
+  const banner = bannerUrl ? `<img src="${bannerUrl}" alt="${blog.title}" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: 6px; margin-bottom: 20px;" />` : '';
 
   return `
   <!DOCTYPE html>
@@ -229,6 +237,60 @@ export function getNewsletterWelcomeTemplate({ email, unsubscribeUrl }) {
         <p style="margin: 0 0 8px;">Syntellos AI</p>
         <p style="margin: 0;">
           <a href="${unsubscribeUrl}" style="color: #E2A33B; text-decoration: underline;">Unsubscribe</a> at any time.
+        </p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+}
+
+
+function escapeNewsletterHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function getNewsletterBroadcastTemplate({ subject, content, unsubscribeUrl, contentIsHtml = false }) {
+  const safeSubject = escapeNewsletterHtml(subject);
+  const formattedContent = contentIsHtml
+    ? content
+    : escapeNewsletterHtml(content)
+        .split(/\n{2,}/)
+        .map((paragraph) => `<p style="color:#D1D5DB;margin:0 0 18px;line-height:1.75;">${paragraph.replace(/\n/g, '<br />')}</p>`)
+        .join('');
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <body style="${baseStyles}">
+    <div style="${containerStyles}">
+      <div style="${headerStyles}">
+        <h1 style="margin:0;font-size:24px;color:#FFFFFF;font-weight:800;letter-spacing:-0.5px;">
+          SYNTELLOS <span style="color:#E2A33B;">AI</span>
+        </h1>
+        <p style="margin:6px 0 0;font-size:13px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;">
+          Syntellos AI Journal
+        </p>
+      </div>
+      <div style="${bodyStyles}">
+        <h2 style="margin:0 0 24px;color:#FFFFFF;font-size:22px;line-height:1.3;">${safeSubject}</h2>
+        <div style="font-size:15px;line-height:1.75;color:#D1D5DB;">
+          ${formattedContent}
+        </div>
+        <div style="text-align:center;margin-top:26px;">
+          <a href="${env.FRONTEND_URL}/blogs" style="${btnStyles}">Explore the Journal →</a>
+        </div>
+      </div>
+      <div style="${footerStyles}">
+        <p style="margin:0 0 8px;">Syntellos AI — technology insights and field notes.</p>
+        <p style="margin:0;">
+          You received this because you subscribed to Syntellos AI Journal.
+          ${unsubscribeUrl ? `<a href="${unsubscribeUrl}" style="color:#E2A33B;text-decoration:underline;">Unsubscribe</a>` : ''}
         </p>
       </div>
     </div>

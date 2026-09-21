@@ -1,5 +1,12 @@
 import { subscriberModel } from '../models/subscriberModel.js';
-import { sendNewsletterWelcome, sendEmail } from '../config/mailer.js';
+import {
+  getMailerStatus,
+  sendNewsletterWelcome,
+  sendEmail,
+  verifyMailer,
+} from '../config/mailer.js';
+import { getNewsletterBroadcastTemplate } from '../views/emailTemplates.js';
+import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
 
 export const newsletterController = {
@@ -25,7 +32,7 @@ export const newsletterController = {
 
       res.status(201).json({
         success: true,
-        message: 'Thank you for subscribing! A welcome confirmation has been sent to your email.',
+        message: 'You are subscribed to Syntellos AI Journal.',
         data: {
           name: subscriber.name,
           email: subscriber.email,
@@ -126,6 +133,14 @@ export const newsletterController = {
         });
       }
 
+      const mailStatus = getMailerStatus();
+      if (!mailStatus.configured) {
+        return res.status(503).json({
+          success: false,
+          message: 'SMTP is not configured. Add the SMTP environment variables before sending a newsletter.',
+        });
+      }
+
       const activeSubscribers = await subscriberModel.getAllActive();
       if (activeSubscribers.length === 0) {
         return res.status(400).json({
@@ -138,22 +153,31 @@ export const newsletterController = {
 
       let sentCount = 0;
       let failCount = 0;
+      const content = htmlContent || plainText;
 
       for (const sub of activeSubscribers) {
+        const unsubscribeUrl = `${env.FRONTEND_URL}/newsletter/unsubscribe?token=${encodeURIComponent(sub.unsubscribe_token || '')}&email=${encodeURIComponent(sub.email)}`;
+        const html = getNewsletterBroadcastTemplate({
+          subject,
+          content,
+          unsubscribeUrl,
+          contentIsHtml: Boolean(htmlContent),
+        });
+
         const emailResult = await sendEmail({
           to: sub.email,
           subject,
-          html: htmlContent || `<div style="font-family:sans-serif;line-height:1.6;">${plainText}</div>`,
+          html,
           type: 'manual_broadcast',
         });
 
-        if (emailResult.success) sentCount++;
-        else failCount++;
+        if (emailResult.success) sentCount += 1;
+        else failCount += 1;
       }
 
       res.status(200).json({
         success: true,
-        message: `Broadcast completed. Sent: ${sentCount}, Failed: ${failCount}`,
+        message: `Newsletter finished. Sent: ${sentCount}, Failed: ${failCount}.`,
         data: {
           total: activeSubscribers.length,
           sent: sentCount,
@@ -175,5 +199,29 @@ export const newsletterController = {
     } catch (err) {
       next(err);
     }
+  },
+
+  async getMailStatus(req, res) {
+    res.status(200).json({
+      success: true,
+      data: getMailerStatus(),
+    });
+  },
+
+  async verifyMailStatus(req, res) {
+    const result = await verifyMailer();
+    if (!result.ok) {
+      return res.status(result.configured ? 502 : 503).json({
+        success: false,
+        message: result.message,
+        data: result,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result,
+    });
   },
 };

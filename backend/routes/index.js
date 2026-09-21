@@ -4,6 +4,7 @@ import leadRoutes from './leadRoutes.js';
 import newsletterRoutes from './newsletterRoutes.js';
 import blogRoutes from './blogRoutes.js';
 import statsRoutes from './statsRoutes.js';
+import mediaRoutes from './mediaRoutes.js';
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use('/leads', leadRoutes);
 router.use('/newsletter', newsletterRoutes);
 router.use('/blogs', blogRoutes);
 router.use('/stats', statsRoutes);
+router.use('/media', mediaRoutes);
 
 export default router;

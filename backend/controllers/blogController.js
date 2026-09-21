@@ -1,6 +1,6 @@
 import { blogModel } from '../models/blogModel.js';
 import { subscriberModel } from '../models/subscriberModel.js';
-import { broadcastNewBlog } from '../config/mailer.js';
+import { broadcastNewBlog, getMailerStatus } from '../config/mailer.js';
 import { logger } from '../utils/logger.js';
 
 function slugify(text) {
@@ -344,6 +344,13 @@ export const blogController = {
         return res.status(404).json({
           success: false,
           message: 'Blog post not found',
+        });
+      }
+
+      if (!getMailerStatus().configured) {
+        return res.status(503).json({
+          success: false,
+          message: 'SMTP is not configured. Add SMTP credentials before emailing subscribers.',
         });
       }
 

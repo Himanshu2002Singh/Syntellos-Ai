@@ -169,3 +169,58 @@ npm install
 2. **Consultation Brief Acknowledgement**: User receives a branded confirmation email upon submitting a lead.
 3. **Admin Alert**: Admin notification email receives instant lead alerts.
 4. **Newsletter Welcome**: Subscribers receive a welcome email with a 1-click unsubscribe link.
+
+
+---
+
+## SMTP + Newsletter Admin
+
+The admin panel now includes a **Newsletter** workspace for subscriber management, SMTP verification, and manual broadcasts.
+
+Set these backend environment variables before sending email:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-user
+SMTP_PASS=your-smtp-password-or-app-password
+SMTP_FROM="Syntellos AI" <verified-sender@example.com>
+FRONTEND_URL=https://your-frontend-domain.com
+```
+
+For port `587`, keep `SMTP_SECURE=false` so the provider can upgrade the connection with STARTTLS. For implicit TLS on port `465`, use `SMTP_SECURE=true`.
+
+Admin email controls:
+- `GET /api/newsletter/mail-status` — shows whether SMTP is configured.
+- `POST /api/newsletter/mail-status/verify` — verifies the SMTP connection without sending a campaign.
+- `POST /api/newsletter/broadcast` — sends a branded newsletter to active subscribers.
+- `POST /api/blogs/admin/:id/broadcast` — sends a published blog alert to active subscribers.
+
+Every blog alert and manual newsletter contains a subscriber-specific unsubscribe link. Blog alert links open the frontend route `/blogs/:slug`.
+
+
+---
+
+## Rich Blog Editor Media
+
+The blog admin editor supports rich HTML content, Word/Google Docs paste, images, videos, YouTube embeds, file attachments, drag-and-drop and pasted screenshots.
+
+Authenticated uploads use:
+
+```text
+POST /api/media/upload
+Authorization: Bearer <admin-token>
+Content-Type: multipart/form-data
+field: file
+```
+
+Uploaded files are served from `/uploads/...`. The backend accepts files up to 100 MB and blocks common executable/script extensions.
+
+For production, set `PUBLIC_URL` to the public backend origin if the platform's forwarded host/protocol is not sufficient:
+
+```env
+PUBLIC_URL=https://api.example.com
+```
+
+The default upload storage is local disk under `backend/uploads`. If the backend is deployed on ephemeral infrastructure, use persistent disk storage or replace the upload storage with an object-storage service before relying on uploads long term.

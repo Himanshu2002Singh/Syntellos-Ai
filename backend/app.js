@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import routes from './routes/index.js';
 import { notFoundHandler, errorHandler } from './middleware/error.js';
 import { env } from './config/env.js';
@@ -11,6 +13,8 @@ import { initMailer } from './config/mailer.js';
 import { runSeed } from './scripts/seed.js';
 import { logger } from './utils/logger.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 // Security headers
@@ -48,6 +52,11 @@ if (env.NODE_ENV !== 'test') {
 // Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Uploaded blog media (admin uploads are stored under backend/uploads).
+app.use('/uploads', express.static(path.resolve(__dirname, 'uploads'), {
+  maxAge: env.NODE_ENV === 'production' ? '7d' : 0,
+}));
 
 // Rate limiters
 const publicLimiter = rateLimit({

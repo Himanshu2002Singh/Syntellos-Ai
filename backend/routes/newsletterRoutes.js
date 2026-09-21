@@ -7,8 +7,11 @@ const router = express.Router();
 
 router.post('/subscribe', validateSubscription, newsletterController.subscribe);
 router.get('/unsubscribe', newsletterController.unsubscribe);
+
 router.get('/subscribers', requireAuth, newsletterController.getSubscribers);
 router.get('/stats', requireAuth, newsletterController.getSubscriberStats);
+router.get('/mail-status', requireAuth, newsletterController.getMailStatus);
+router.post('/mail-status/verify', requireAuth, newsletterController.verifyMailStatus);
 router.post('/broadcast', requireAuth, newsletterController.sendManualBroadcast);
 router.delete('/subscribers/:id', requireAuth, newsletterController.deleteSubscriber);
 
