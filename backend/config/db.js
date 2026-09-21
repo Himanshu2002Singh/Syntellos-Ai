@@ -177,6 +177,7 @@ async function createTables() {
   await db.run(`
     CREATE TABLE IF NOT EXISTS subscribers (
       id ${autoInc},
+      name VARCHAR(255),
       email VARCHAR(255) UNIQUE NOT NULL,
       unsubscribe_token VARCHAR(255),
       is_active ${isMySQL ? 'TINYINT(1) DEFAULT 1' : 'INTEGER DEFAULT 1'},
@@ -184,6 +185,22 @@ async function createTables() {
       unsubscribed_at DATETIME
     );
   `);
+
+  // Lightweight migration for databases created before subscriber names were collected.
+  if (!isMySQL) {
+    const columns = await db.all('PRAGMA table_info(subscribers)');
+    if (!columns.some((column) => column.name === 'name')) {
+      await db.run('ALTER TABLE subscribers ADD COLUMN name VARCHAR(255)');
+    }
+  } else {
+    const columns = await db.all(`
+      SELECT COLUMN_NAME AS name FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'subscribers'
+    `, [env.DB_NAME]);
+    if (!columns.some((column) => column.name === 'name')) {
+      await db.run('ALTER TABLE subscribers ADD COLUMN name VARCHAR(255)');
+    }
+  }
 
   // Blogs table
   await db.run(`

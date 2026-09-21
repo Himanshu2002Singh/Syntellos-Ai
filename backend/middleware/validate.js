@@ -30,7 +30,14 @@ export function validateLeadSubmission(req, res, next) {
 }
 
 export function validateSubscription(req, res, next) {
-  const { email } = req.body;
+  const { name, email } = req.body;
+
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Your name is required to subscribe.'
+    });
+  }
 
   if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return res.status(400).json({

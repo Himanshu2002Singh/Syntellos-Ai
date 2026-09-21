@@ -182,7 +182,7 @@ In oil & gas, transmission grids, and heavy automotive manufacturing, field engi
       'operations.head@energypower.in',
     ];
     for (const email of sampleEmails) {
-      await subscriberModel.create(email);
+      await subscriberModel.create({ name: 'Syntellos subscriber', email });
     }
     logger.success(`Seeded ${sampleEmails.length} sample newsletter subscribers.`);
   }

@@ -29,7 +29,10 @@ function createWhatsAppLeadUrl(lead, leadId) {
 }
 
 export default function Contact() {
-  const [intent, setIntent] = useState(intents[0]);
+  const initialIntent = new URLSearchParams(window.location.search).get("intent");
+  const [intent, setIntent] = useState(
+    initialIntent === "partner" ? "OEM / global partner" : intents[0],
+  );
   const [submitting, setSubmitting] = useState(false);
   const [submission, setSubmission] = useState(null);
 
@@ -58,27 +61,46 @@ export default function Contact() {
     }
   }
 
-  function handleWhatsAppSubmit(event) {
+  async function handleWhatsAppSubmit(event) {
     const form = event.currentTarget.form;
     if (!form.reportValidity()) return;
 
     const lead = Object.fromEntries(new FormData(form).entries());
-    window.open(createWhatsAppLeadUrl(lead), "_blank", "noopener,noreferrer");
+    setSubmitting(true);
+    setSubmission(null);
+    try {
+      const result = await submitConsultationLead(lead);
+      window.open(
+        createWhatsAppLeadUrl(lead, result.data.id),
+        "_blank",
+        "noopener,noreferrer",
+      );
+      setSubmission({
+        type: "success",
+        message: "Your enquiry was saved. WhatsApp has opened so you can continue the conversation.",
+      });
+      form.reset();
+      setIntent(intents[0]);
+    } catch (error) {
+      setSubmission({ type: "error", message: error.message });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <section className="contact">
       <div>
-        <span className="section-label">START THE CONVERSATION</span>
-        <h2>Tell us what needs to move.</h2>
+        <span className="section-label">CONTACT US</span>
+        <h2>Talk to our team.</h2>
         <p>
-          We’ll use the brief to map a practical next step. More project details
-          can be added as they are confirmed.
+          Tell us what you need help with. We will review your requirement and
+          suggest the right next step.
         </p>
         <ol>
-          <li>Share the context</li>
-          <li>Choose your route</li>
-          <li>Get a considered response</li>
+          <li>Share your requirement</li>
+          <li>Choose the service you need</li>
+          <li>Get clear next steps</li>
         </ol>
       </div>
       <form onSubmit={handleSubmit}>
@@ -182,8 +204,9 @@ export default function Contact() {
             className="whatsapp-submit"
             type="button"
             onClick={handleWhatsAppSubmit}
+            disabled={submitting}
           >
-            Send on WhatsApp →
+            {submitting ? "Saving enquiry..." : "Send on WhatsApp →"}
           </button>
         </div>
       </form>

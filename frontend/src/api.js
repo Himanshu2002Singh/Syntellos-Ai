@@ -34,3 +34,30 @@ export async function submitConsultationLead(lead) {
     body: JSON.stringify(lead),
   });
 }
+
+export async function subscribeToNewsletter(subscriber) {
+  return request('/newsletter/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscriber),
+  });
+}
+
+export async function adminRequest(path, token, options = {}) {
+  return request(path, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+  });
+}
+
+export async function adminLogin(credentials) {
+  return request('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+}

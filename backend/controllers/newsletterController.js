@@ -5,14 +5,14 @@ import { logger } from '../utils/logger.js';
 export const newsletterController = {
   async subscribe(req, res, next) {
     try {
-      const { email } = req.body;
-      const subscriber = await subscriberModel.create(email);
+      const { name, email } = req.body;
+      const subscriber = await subscriberModel.create({ name, email });
 
       if (subscriber.alreadySubscribed) {
         return res.status(200).json({
           success: true,
           message: 'You are already subscribed to Syntellos AI Journal.',
-          data: { email: subscriber.email, is_active: true },
+          data: { name: subscriber.name, email: subscriber.email, is_active: true },
         });
       }
 
@@ -27,6 +27,7 @@ export const newsletterController = {
         success: true,
         message: 'Thank you for subscribing! A welcome confirmation has been sent to your email.',
         data: {
+          name: subscriber.name,
           email: subscriber.email,
           is_active: true,
         },
