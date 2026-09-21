@@ -460,14 +460,31 @@ function OfferingsPage({ setPage }) {
           implementation, training, labs and equipment access based on your needs.
         </p>
       </section>
-      <Steps title="Use equipment when your project needs it." text="We help you explore availability and commercial options for a focused pilot, a temporary requirement or a wider deployment." steps={deliverySteps} />
       <nav className="offering-jump" aria-label="Offering categories">
-        {offerings.map((offering, index) => (
-          <a href={`#offering-${index + 1}`} key={offering.title}>
-            <span>0{index + 1}</span>
-            {offering.shortTitle || offering.title}
-          </a>
-        ))}
+        {offerings.map((offering, index) => {
+          const Icon = offering.icon;
+          return (
+            <a
+              href={`#offering-${index + 1}`}
+              key={offering.title}
+              className="offering-jump-item"
+            >
+              <div className="offering-jump-top">
+                <span className="offering-jump-num">0{index + 1}</span>
+                {Icon && <Icon size={20} className="offering-jump-icon" aria-hidden="true" />}
+              </div>
+              <div className="offering-jump-body">
+                <strong className="offering-jump-title">
+                  {offering.shortTitle || offering.title}
+                </strong>
+                <span className="offering-jump-group">{offering.group}</span>
+              </div>
+              <span className="offering-jump-action">
+                View section <ArrowUpRight size={14} />
+              </span>
+            </a>
+          );
+        })}
       </nav>
       <section className="offering-detail-list">
         {offerings.map((offering, index) => {
@@ -518,6 +535,11 @@ function OfferingsPage({ setPage }) {
           );
         })}
       </section>
+      <Steps
+        title="From requirements to live operations."
+        text="We help you explore availability and commercial options for a focused pilot, a temporary requirement or a wider deployment."
+        steps={deliverySteps}
+      />
       <Contact />
     </main>
   );
