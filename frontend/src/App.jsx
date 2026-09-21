@@ -117,7 +117,14 @@ function Home({ setPage, blogs }) {
         </div>
         <div className="pathfinder-grid">
           {audiencePaths.map((path, index) => (
-            <button onClick={() => setPage(path.page)} key={path.title}>
+            <button
+              onClick={() =>
+                path.offeringIndex === undefined
+                  ? setPage(path.page)
+                  : setPage("offering-detail", path.offeringIndex)
+              }
+              key={path.title}
+            >
               <span>{String(index + 1).padStart(2, "0")} / {path.eyebrow}</span>
               <h3>{path.title}</h3>
               <p>{path.text}</p>
@@ -158,7 +165,7 @@ function Home({ setPage, blogs }) {
         </div>
       </section>
       <Bridge />
-      <OfferingGrid onExplore={() => setPage("offerings")} />
+      <OfferingGrid onExplore={(index) => setPage("offering-detail", index)} />
       <section className="difference-section">
         <div className="difference-heading">
           <span>WHAT MAKES THIS OFFERING GENUINELY DIFFERENT</span>
@@ -594,13 +601,26 @@ export default function App() {
     setPage(next);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
+  const navigateToOffering = (index) => {
+    const path = routeByPage.offerings;
+    if (window.location.pathname !== path)
+      window.history.pushState({}, "", path);
+    setPage("offerings");
+    window.setTimeout(() => {
+      document.getElementById(`offering-${index + 1}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
   const navigatePartner = () => {
     window.history.pushState({}, "", "/contact?intent=partner");
     setPage("contact");
     window.scrollTo({ top: 0, behavior: "instant" });
   };
-  const navigateFromHome = (next) => {
+  const navigateFromHome = (next, offeringIndex) => {
     if (next === "partner") navigatePartner();
+    else if (next === "offering-detail") navigateToOffering(offeringIndex);
     else navigate(next);
   };
   const view = {

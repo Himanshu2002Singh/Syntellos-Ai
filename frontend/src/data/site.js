@@ -141,6 +141,7 @@ export const audiencePaths = [
     text: "Explore GenAI, agentic AI, computer vision, predictive analytics, IoT, robotics and XR solutions.",
     action: "Explore solutions",
     page: "offerings",
+    offeringIndex: 0,
   },
   {
     eyebrow: "FOR COLLEGES & INSTITUTIONS",
@@ -148,6 +149,7 @@ export const audiencePaths = [
     text: "Create AI, robotics, IoT and XR labs with faculty enablement, student training and industry-aligned programmes.",
     action: "View labs & training",
     page: "offerings",
+    offeringIndex: 2,
   },
   {
     eyebrow: "FOR GLOBAL OEMs & PARTNERS",

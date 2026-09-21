@@ -19,7 +19,18 @@ export default function OfferingGrid({ onExplore }) {
         {offerings.map((item, index) => {
           const Icon = item.icon;
           return (
-            <article key={item.title}>
+            <article
+              key={item.title}
+              onClick={() => onExplore(index)}
+              role="link"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onExplore(index);
+                }
+              }}
+            >
               <img src={item.image} alt={item.imageAlt} />
               <div className="card-layer">
                 <span>
@@ -28,7 +39,7 @@ export default function OfferingGrid({ onExplore }) {
                 <Icon size={25} />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
-                <button onClick={onExplore}>
+                <button onClick={() => onExplore(index)}>
                   View services <ArrowUpRight size={17} />
                 </button>
               </div>
