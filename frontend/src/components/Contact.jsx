@@ -9,23 +9,19 @@ const intents = [
   "Equipment leasing",
 ];
 
-function createWhatsAppLeadUrl(lead, leadId) {
-  const phone = (import.meta.env.VITE_WHATSAPP_PHONE || "919889505166").replace(
-    /\D/g,
-    "",
-  );
+function createWhatsAppUrl(lead, leadId) {
+  const phone = (import.meta.env.VITE_WHATSAPP_PHONE || "919889505166").replace(/\D/g, "");
   const message = [
-    leadId ? "New consultation lead #" + leadId : "New consultation enquiry",
-    "Name: " + lead.name,
-    "Phone: " + lead.phone,
-    "Email: " + lead.email,
-    "Organisation: " + (lead.organization || "Not provided"),
-    "City: " + (lead.city || "Not provided"),
-    "Intent: " + lead.intent,
-    "Brief: " + lead.message,
+    leadId ? `New consultation query #${leadId}` : "New consultation query",
+    `Name: ${lead.name}`,
+    `Phone: ${lead.phone}`,
+    `Email: ${lead.email}`,
+    `Organisation: ${lead.organization || "Not provided"}`,
+    `City: ${lead.city || "Not provided"}`,
+    `Intent: ${lead.intent}`,
+    `Brief: ${lead.message}`,
   ].join("\n");
-
-  return "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
 export default function Contact() {
@@ -44,44 +40,23 @@ export default function Contact() {
     const form = event.currentTarget;
     const fields = new FormData(form);
     const lead = Object.fromEntries(fields.entries());
+    // Open the tab during the user gesture so browsers do not block it after
+    // the database/email request completes.
+    const whatsappWindow = window.open("about:blank", "_blank");
 
     try {
       const result = await submitConsultationLead(lead);
+      const whatsappUrl = createWhatsAppUrl(lead, result.data?.id);
+      if (whatsappWindow) whatsappWindow.location.href = whatsappUrl;
       setSubmission({
         type: "success",
-        message: result.message,
-        whatsappUrl: createWhatsAppLeadUrl(lead, result.data.id),
+        message: `${result.message} WhatsApp has opened with the query details.`,
+        whatsappUrl,
       });
       form.reset();
       setIntent(intents[0]);
     } catch (error) {
-      setSubmission({ type: "error", message: error.message });
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleWhatsAppSubmit(event) {
-    const form = event.currentTarget.form;
-    if (!form.reportValidity()) return;
-
-    const lead = Object.fromEntries(new FormData(form).entries());
-    setSubmitting(true);
-    setSubmission(null);
-    try {
-      const result = await submitConsultationLead(lead);
-      window.open(
-        createWhatsAppLeadUrl(lead, result.data.id),
-        "_blank",
-        "noopener,noreferrer",
-      );
-      setSubmission({
-        type: "success",
-        message: "Your enquiry was saved. WhatsApp has opened so you can continue the conversation.",
-      });
-      form.reset();
-      setIntent(intents[0]);
-    } catch (error) {
+      if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
       setSubmission({ type: "error", message: error.message });
     } finally {
       setSubmitting(false);
@@ -185,28 +160,15 @@ export default function Contact() {
           >
             <p>{submission.message}</p>
             {submission.whatsappUrl && (
-              <a
-                className="whatsapp-link"
-                href={submission.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Continue to WhatsApp →
+              <a className="whatsapp-link" href={submission.whatsappUrl} target="_blank" rel="noopener noreferrer">
+                Open WhatsApp manually →
               </a>
             )}
           </div>
         )}
         <div className="contact-actions">
           <button type="submit" disabled={submitting}>
-            {submitting ? "Sending..." : "Send brief →"}
-          </button>
-          <button
-            className="whatsapp-submit"
-            type="button"
-            onClick={handleWhatsAppSubmit}
-            disabled={submitting}
-          >
-            {submitting ? "Saving enquiry..." : "Send on WhatsApp →"}
+            {submitting ? "Submitting..." : "Submit query →"}
           </button>
         </div>
       </form>

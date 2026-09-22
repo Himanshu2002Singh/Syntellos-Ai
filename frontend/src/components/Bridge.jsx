@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 const panels = [
   [
     "Global technology partners",
@@ -37,17 +36,14 @@ export default function Bridge() {
       </div>
       <div className="ecosystem-panels">
         {panels.map(([title, copy, image, imageAlt], index) => (
-          <button key={title} className={`ecosystem-panel panel-${index + 1}`}>
+          <article key={title} className={`ecosystem-panel panel-${index + 1}`}>
             <img src={image} alt={imageAlt} />
             <div>
               <span>0{index + 1}</span>
               <h3>{title}</h3>
               <p>{copy}</p>
-              <b>
-                How it works <ArrowUpRight size={16} />
-              </b>
             </div>
-          </button>
+          </article>
         ))}
       </div>
     </section>
