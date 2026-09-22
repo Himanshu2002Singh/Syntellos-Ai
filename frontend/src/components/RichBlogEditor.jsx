@@ -5,7 +5,6 @@ import {
   AlignRight,
   Bold,
   Code2,
-  Film,
   Heading2,
   Heading3,
   Image as ImageIcon,
@@ -19,7 +18,6 @@ import {
   Redo2,
   Undo2,
   X,
-  Youtube,
 } from "lucide-react";
 import { adminUpload } from "../api";
 
@@ -81,10 +79,25 @@ function rangeAtPoint(x, y) {
   return null;
 }
 
+function sanitizePastedHtml(html = "") {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script, style, meta, link, iframe, video, object, embed").forEach((node) => node.remove());
+  doc.querySelectorAll("*").forEach((node) => {
+    [...node.attributes].forEach((attribute) => {
+      if (attribute.name !== "href" && attribute.name !== "src" && attribute.name !== "alt" && attribute.name !== "target") {
+        node.removeAttribute(attribute.name);
+      }
+    });
+  });
+  return doc.body.innerHTML
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\u00a0/g, " ")
+    .replace(/<p>\s*<\/p>/gi, "<p><br></p>");
+}
+
 export default function RichBlogEditor({ content = "", onChange, token }) {
   const editorRef = useRef(null);
   const imageInputRef = useRef(null);
-  const videoInputRef = useRef(null);
   const attachmentInputRef = useRef(null);
   const savedRangeRef = useRef(null);
   const lastHtmlRef = useRef(content || "");
@@ -127,10 +140,18 @@ export default function RichBlogEditor({ content = "", onChange, token }) {
   function restoreSelection(range = savedRangeRef.current) {
     const node = editorRef.current;
     if (!node) return;
-    node.focus();
-
     const selection = window.getSelection();
     if (!selection) return;
+
+    // Keep the browser's current selection when the toolbar is clicked. A live
+    // Range saved before formatting can become stale after the DOM is wrapped
+    // in <strong>/<em>, which made the second click fail to toggle formatting.
+    if (selection.rangeCount && node.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+      node.focus();
+      return;
+    }
+
+    node.focus();
 
     selection.removeAllRanges();
     if (range) {
@@ -233,11 +254,43 @@ export default function RichBlogEditor({ content = "", onChange, token }) {
   function handlePaste(event) {
     const items = Array.from(event.clipboardData?.items || []);
     const fileItem = items.find((item) => item.kind === "file" && item.type.startsWith("image/"));
-    if (!fileItem) return;
-    const file = fileItem.getAsFile();
-    if (!file) return;
+    if (fileItem) {
+      const file = fileItem.getAsFile();
+      if (!file) return;
+      event.preventDefault();
+      insertUploadedFile(file);
+      return;
+    }
+
     event.preventDefault();
-    insertUploadedFile(file);
+    const html = event.clipboardData?.getData("text/html");
+    const text = event.clipboardData?.getData("text/plain") || "";
+    if (html) {
+      insertHtml(sanitizePastedHtml(html));
+    } else {
+      const safeText = text.split(/\r?\n/).map((line) => `<p>${escapeHtml(line)}</p>`).join("");
+      insertHtml(safeText || "<p><br></p>");
+    }
+  }
+
+  function handleKeyDown(event) {
+    if (!(event.ctrlKey || event.metaKey)) return;
+    const key = event.key.toLowerCase();
+    if (event.altKey && ["2", "3", "4"].includes(key)) {
+      event.preventDefault();
+      formatHeading(Number(key));
+      return;
+    }
+    const commandName = key === "b" ? "bold" : key === "i" ? "italic" : key === "u" ? "underline" : key === "z" ? "undo" : key === "y" ? "redo" : "";
+    if (!commandName) return;
+    event.preventDefault();
+    document.execCommand(commandName, false, null);
+    emitChange();
+    forceToolbarUpdate((current) => current + 1);
+  }
+
+  function formatHeading(level) {
+    command("formatBlock", `H${level}`);
   }
 
   function handleEditorClick(event) {
@@ -288,7 +341,15 @@ export default function RichBlogEditor({ content = "", onChange, token }) {
       aria-label={title}
       className={isActive ? "rich-editor-btn active" : "rich-editor-btn"}
       disabled={disabled}
-      onMouseDown={(event) => event.preventDefault()}
+      onMouseDown={(event) => {
+        // Prevent focus loss, but explicitly preserve the selection before the
+        // browser dispatches the toolbar click.
+        event.preventDefault();
+        const selection = window.getSelection();
+        if (selection?.rangeCount && editorRef.current?.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+          savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+        }
+      }}
       onClick={onClick}
     >
       {children}
@@ -302,6 +363,7 @@ export default function RichBlogEditor({ content = "", onChange, token }) {
         <Button title="Italic" isActive={active("italic")} onClick={() => command("italic")}><Italic size={16} /></Button>
         <Button title="Heading 2" onClick={() => command("formatBlock", "H2")}><Heading2 size={16} /></Button>
         <Button title="Heading 3" onClick={() => command("formatBlock", "H3")}><Heading3 size={16} /></Button>
+        <Button title="Heading 4" onClick={() => formatHeading(4)}><span className="rich-editor-heading-button">H4</span></Button>
         <Button title="Bullet list" isActive={active("insertUnorderedList")} onClick={() => command("insertUnorderedList")}><List size={16} /></Button>
         <Button title="Numbered list" isActive={active("insertOrderedList")} onClick={() => command("insertOrderedList")}><ListOrdered size={16} /></Button>
         <Button title="Quote" onClick={() => command("formatBlock", "BLOCKQUOTE")}><Quote size={16} /></Button>
@@ -316,15 +378,16 @@ export default function RichBlogEditor({ content = "", onChange, token }) {
         <span className="rich-editor-divider" />
 
         <Button title="Upload image" disabled={uploading} onClick={() => imageInputRef.current?.click()}><ImageIcon size={16} /></Button>
-        <Button title="Upload video" disabled={uploading} onClick={() => videoInputRef.current?.click()}><Film size={16} /></Button>
-        <Button title="Embed YouTube video" disabled={uploading} onClick={() => setYoutubeOpen(true)}><Youtube size={16} /></Button>
+        {/* Video upload/embed is intentionally disabled for now; retain the implementation for a future release. */}
+        {/* <Button title="Upload video" disabled={uploading} onClick={() => videoInputRef.current?.click()}><Film size={16} /></Button> */}
+        {/* <Button title="Embed YouTube video" disabled={uploading} onClick={() => setYoutubeOpen(true)}><Youtube size={16} /></Button> */}
         <Button title="Attach file" disabled={uploading} onClick={() => attachmentInputRef.current?.click()}><Paperclip size={16} /></Button>
 
         {uploading && <span className="rich-editor-uploading"><Loader2 size={14} /> Uploading…</span>}
         <span className="rich-editor-tip">Paste from Word/Docs · drag files here · paste screenshots</span>
 
         <input ref={imageInputRef} type="file" accept="image/*" hidden onChange={handleMediaPick} />
-        <input ref={videoInputRef} type="file" accept="video/*" hidden onChange={handleMediaPick} />
+        {/* <input ref={videoInputRef} type="file" accept="video/*" hidden onChange={handleMediaPick} /> */}
         <input ref={attachmentInputRef} type="file" hidden onChange={handleAttachmentPick} />
       </div>
 
@@ -358,6 +421,7 @@ export default function RichBlogEditor({ content = "", onChange, token }) {
         data-placeholder="Paste an article from Word or Google Docs, or start writing here…"
         onInput={emitChange}
         onBlur={emitChange}
+        onKeyDown={handleKeyDown}
         onDrop={handleDrop}
         onDragOver={(event) => event.preventDefault()}
         onPaste={handlePaste}

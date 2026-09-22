@@ -15,7 +15,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { adminLogin, adminRequest } from "../api";
+import { adminLogin, adminRequest, adminUpload } from "../api";
 import RichBlogEditor from "./RichBlogEditor";
 
 const blankPost = {
@@ -25,7 +25,7 @@ const blankPost = {
   excerpt: "",
   content: "",
   featured_image: "",
-  featured_video: "",
+  // featured_video is retained in the data model for a future release.
   author: "Syntellos AI Editorial",
   read_time: "5 min read",
   tags: "",
@@ -34,6 +34,18 @@ const blankPost = {
 
 function looksLikeHtml(value = "") {
   return /<\/?[a-z][\s\S]*>/i.test(value);
+}
+
+function formatIST(value, includeTime = true) {
+  if (!value) return "—";
+  const raw = String(value);
+  const date = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? raw : `${raw.replace(" ", "T")}Z`);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    dateStyle: "medium",
+    ...(includeTime ? { timeStyle: "short" } : {}),
+  }).format(date);
 }
 
 function markdownToEditorHtml(value = "") {
@@ -67,7 +79,8 @@ function markdownToEditorHtml(value = "") {
     }
 
     flushList();
-    if (line.startsWith("### ")) output.push(`<h3>${inline(line.slice(4))}</h3>`);
+    if (line.startsWith("#### ")) output.push(`<h4>${inline(line.slice(5))}</h4>`);
+    else if (line.startsWith("### ")) output.push(`<h3>${inline(line.slice(4))}</h3>`);
     else if (line.startsWith("## ")) output.push(`<h2>${inline(line.slice(3))}</h2>`);
     else if (line.startsWith("# ")) output.push(`<h2>${inline(line.slice(2))}</h2>`);
     else if (line.startsWith("> ")) output.push(`<blockquote>${inline(line.slice(2))}</blockquote>`);
@@ -85,7 +98,6 @@ const editablePostKeys = [
   "excerpt",
   "content",
   "featured_image",
-  "featured_video",
   "author",
   "read_time",
   "tags",
@@ -136,6 +148,9 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
   const [message, setMessage] = useState("");
   const [restoredDraft, setRestoredDraft] = useState(Boolean(restored));
   const [editorResetKey, setEditorResetKey] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const imageInputRef = useRef(null);
   const draftKeyRef = useRef(initialDraftKey);
   const autosaveTimer = useRef(null);
 
@@ -172,6 +187,10 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
   }
 
   async function save(publishNow) {
+    if (!post.title.trim() || !post.category.trim() || !post.excerpt.trim() || !post.content.replace(/<[^>]*>/g, "").trim()) {
+      setMessage("Please complete all required fields: title, category, short description and article content.");
+      return;
+    }
     setSaving(true);
     setMessage("");
     try {
@@ -216,6 +235,23 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
     }
   }
 
+  async function uploadFeaturedImage(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    setImageUploading(true);
+    try {
+      const result = await adminUpload("/media/upload", token, formData);
+      update("featured_image", result.data.url);
+    } catch (error) {
+      setMessage(`Image upload failed: ${error.message}`);
+    } finally {
+      setImageUploading(false);
+    }
+  }
+
   const canPublish = !post.is_published;
 
   return (
@@ -224,7 +260,7 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
         <div>
           <span>CONTENT EDITOR</span>
           <h2>{post.id ? "Edit blog post" : "Write a new blog post"}</h2>
-          <p>Rich text, images, uploaded videos, YouTube embeds and attachments — with browser autosave while you work.</p>
+          <p>Rich text, images and attachments — with browser autosave while you work.</p>
         </div>
         <button className="admin-link" onClick={onCancel}><ArrowLeft size={16} /> Back to posts</button>
       </div>
@@ -242,57 +278,58 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
       <div className="editor-layout rich-editor-layout">
         <div className="editor-main">
           <label>
-            Title
-            <input value={post.title} onChange={(e) => update("title", e.target.value)} placeholder="Clear, specific post title" />
+            Title <span className="field-required">Required</span>
+            <input required value={post.title} onChange={(e) => update("title", e.target.value)} placeholder="Clear, specific post title" />
           </label>
 
           <div className="editor-two">
             <label>
-              Slug
+              Slug <span className="field-optional">Optional · auto-generated</span>
               <input value={post.slug || ""} onChange={(e) => update("slug", e.target.value)} placeholder="generated-from-title" />
             </label>
             <label>
-              Category
-              <input value={post.category} onChange={(e) => update("category", e.target.value)} />
+              Category <span className="field-required">Required</span>
+              <input required value={post.category} onChange={(e) => update("category", e.target.value)} />
             </label>
           </div>
 
           <div className="editor-two">
             <label>
-              Reading time
+              Reading time <span className="field-optional">Optional</span>
               <input value={post.read_time} onChange={(e) => update("read_time", e.target.value)} />
             </label>
             <label>
-              Author
+              Author <span className="field-optional">Optional</span>
               <input value={post.author} onChange={(e) => update("author", e.target.value)} />
             </label>
           </div>
 
           <label>
-            Short description
+            Short description <span className="field-required">Required · max 300 characters</span>
             <textarea
               className="editor-excerpt"
               value={post.excerpt || ""}
               onChange={(e) => update("excerpt", e.target.value)}
               placeholder="What the reader will learn"
               rows="3"
+              maxLength="300"
+              required
             />
+            <small className="field-count">{(post.excerpt || "").length}/300</small>
           </label>
 
-          <div className="editor-two">
-            <label>
-              Featured image URL
-              <input value={post.featured_image || ""} onChange={(e) => update("featured_image", e.target.value)} placeholder="/media/images/example.jpg or https://..." />
-            </label>
-            <label>
-              Featured video URL
-              <input value={post.featured_video || ""} onChange={(e) => update("featured_video", e.target.value)} placeholder="Optional hero video URL" />
-            </label>
-          </div>
+          <label>
+            Featured image <span className="field-optional">Optional</span>
+            <div className="image-url-row">
+              <input value={post.featured_image || ""} onChange={(e) => update("featured_image", e.target.value)} placeholder="Paste an image URL or upload a file" />
+              <button type="button" onClick={() => imageInputRef.current?.click()} disabled={imageUploading}>{imageUploading ? "Uploading…" : "Upload image"}</button>
+              <input ref={imageInputRef} type="file" accept="image/*" hidden onChange={uploadFeaturedImage} />
+            </div>
+          </label>
 
           <div className="editor-content-head">
             <div>
-              <div className="editor-label">Article content</div>
+              <div className="editor-label">Article content <span className="field-required">Required</span></div>
               <small>Paste from Word/Google Docs or compose directly. Formatting is stored as rich HTML.</small>
             </div>
             <span>Autosaves locally</span>
@@ -306,7 +343,7 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
           />
 
           <label>
-            Tags
+            Tags <span className="field-optional">Optional</span>
             <input value={post.tags || ""} onChange={(e) => update("tags", e.target.value)} placeholder="AI, IoT, technology" />
           </label>
 
@@ -342,13 +379,11 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
         </div>
 
         <aside className="editor-preview rich-editor-preview">
-          <span>LIVE PREVIEW</span>
+          <div className="preview-head"><span>LIVE PREVIEW</span><button type="button" onClick={() => setPreviewOpen(true)}><Eye size={15} /> Open larger preview</button></div>
           <div className="preview-meta">{post.category || "Category"} · {post.read_time || "5 min read"}</div>
           <h1>{post.title || "Your post title"}</h1>
           <p>{post.excerpt || "A short description will appear here."}</p>
-          {post.featured_video ? (
-            <video controls poster={post.featured_image || undefined} src={post.featured_video} />
-          ) : post.featured_image ? (
+          {post.featured_image ? (
             <img src={post.featured_image} alt="Post preview" />
           ) : null}
           <div
@@ -357,6 +392,20 @@ function BlogEditor({ initial, onCancel, onSaved, token, mailConfigured }) {
           />
         </aside>
       </div>
+      {previewOpen && (
+        <div className="preview-modal-backdrop" role="dialog" aria-modal="true" onMouseDown={() => setPreviewOpen(false)}>
+          <section className="preview-modal" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="preview-modal-head"><b>Article preview</b><button type="button" onClick={() => setPreviewOpen(false)}>Close</button></div>
+            <div className="preview-modal-body">
+              <div className="preview-meta">{post.category || "Category"} · {post.read_time || "5 min read"}</div>
+              <h1>{post.title || "Your post title"}</h1>
+              <p>{post.excerpt || "A short description will appear here."}</p>
+              {post.featured_image && <img src={post.featured_image} alt="Post preview" />}
+              <div className="blog-rich-content" dangerouslySetInnerHTML={{ __html: post.content || "<p>Start writing to preview the article.</p>" }} />
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   );
 }
@@ -365,17 +414,20 @@ function NewsletterPanel({ token, subscribers, stats, mailStatus, onReload }) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [search, setSearch] = useState("");
+  const [subscriberPage, setSubscriberPage] = useState(1);
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState("");
 
-  const visibleSubscribers = useMemo(() => {
+  const filteredSubscribers = useMemo(() => {
     const needle = search.trim().toLowerCase();
     if (!needle) return subscribers;
     return subscribers.filter((sub) =>
       `${sub.name || ""} ${sub.email || ""}`.toLowerCase().includes(needle)
     );
   }, [search, subscribers]);
+  const visibleSubscribers = filteredSubscribers.slice((subscriberPage - 1) * 10, subscriberPage * 10);
+  const subscriberPages = Math.max(1, Math.ceil(filteredSubscribers.length / 10));
 
   async function sendBroadcast(event) {
     event.preventDefault();
@@ -539,13 +591,53 @@ function NewsletterPanel({ token, subscribers, stats, mailStatus, onReload }) {
               <span className={subscriber.is_active ? "subscriber-active" : "subscriber-inactive"}>
                 {subscriber.is_active ? "Active" : "Unsubscribed"}
               </span>
-              <span>{subscriber.subscribed_at ? new Date(subscriber.subscribed_at).toLocaleDateString() : "—"}</span>
+              <span>{formatIST(subscriber.subscribed_at, false)}</span>
               <button onClick={() => removeSubscriber(subscriber)} title="Remove subscriber"><Trash2 size={16} /></button>
             </div>
           ))}
           {visibleSubscribers.length === 0 && <p className="empty-admin">No subscribers match this search.</p>}
         </div>
+        {subscriberPages > 1 && <div className="admin-pagination"><button disabled={subscriberPage === 1} onClick={() => setSubscriberPage((page) => page - 1)}>Previous</button><span>Page {subscriberPage} of {subscriberPages}</span><button disabled={subscriberPage === subscriberPages} onClick={() => setSubscriberPage((page) => page + 1)}>Next</button></div>}
       </section>
+    </section>
+  );
+}
+
+function QueriesPanel({ leads, loading, onResolve }) {
+  const [page, setPage] = useState(1);
+  const visibleLeads = leads.slice((page - 1) * 10, page * 10);
+  const pages = Math.max(1, Math.ceil(leads.length / 10));
+  return (
+    <section className="admin-dashboard">
+      <div className="admin-dashboard-head">
+        <div>
+          <span>CONTACT INBOX</span>
+          <h1>Queries</h1>
+          <p>Review every submitted enquiry. New queries are unresolved until an admin marks them resolved.</p>
+        </div>
+      </div>
+      <div className="admin-stats admin-stats-four">
+        <div><b>{leads.length}</b><span>Total queries</span></div>
+        <div><b>{leads.filter((lead) => lead.status === "new").length}</b><span>Unresolved</span></div>
+        <div><b>{leads.filter((lead) => lead.status === "closed").length}</b><span>Resolved</span></div>
+      </div>
+      <div className="query-table">
+        {loading ? <p>Loading queries…</p> : visibleLeads.map((lead) => (
+          <article key={lead.id} className={lead.status === "closed" ? "resolved" : ""}>
+            <div>
+              <span>#{lead.id} · {lead.intent}</span>
+              <h2>{lead.name}</h2>
+              <p>{lead.message}</p>
+              <small>{lead.email} · {lead.phone || "No phone"} · {formatIST(lead.created_at)}</small>
+            </div>
+            <button disabled={lead.status === "closed"} onClick={() => onResolve(lead)}>
+              <CheckCircle2 size={16} /> {lead.status === "closed" ? "Resolved" : "Mark resolved"}
+            </button>
+          </article>
+        ))}
+        {!loading && leads.length === 0 && <p className="empty-admin">No queries yet.</p>}
+      </div>
+      {pages > 1 && <div className="admin-pagination"><button disabled={page === 1} onClick={() => setPage((value) => value - 1)}>Previous</button><span>Page {page} of {pages}</span><button disabled={page === pages} onClick={() => setPage((value) => value + 1)}>Next</button></div>}
     </section>
   );
 }
@@ -554,11 +646,12 @@ export default function AdminPanel({ onExit }) {
   const [token, setToken] = useState(() => localStorage.getItem("syntellos_admin_token") || "");
   const [posts, setPosts] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
+  const [leads, setLeads] = useState([]);
   const [subscriberStats, setSubscriberStats] = useState({ total: 0, active: 0, unsubscribed: 0 });
   const [mailStatus, setMailStatus] = useState({ configured: false, endpointAvailable: true });
   const [dashboard, setDashboard] = useState({ metrics: {} });
   const [activeTab, setActiveTab] = useState(() =>
-    window.location.pathname.startsWith("/admin/newsletter") ? "newsletter" : "blogs"
+    window.location.pathname.startsWith("/admin/queries") ? "queries" : window.location.pathname.startsWith("/admin/newsletter") ? "newsletter" : "blogs"
   );
   const [editing, setEditing] = useState(() => {
     const path = window.location.pathname;
@@ -569,6 +662,7 @@ export default function AdminPanel({ onExit }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+  const [postPage, setPostPage] = useState(1);
 
   const logout = () => {
     localStorage.removeItem("syntellos_admin_token");
@@ -583,17 +677,19 @@ export default function AdminPanel({ onExit }) {
     try {
       // SMTP status is optional. Do not let a stale backend deployment break the
       // entire admin dashboard just because this newer endpoint is unavailable.
-      const [postResult, subscriberResult, subscriberStatsResult, dashboardResult] = await Promise.all([
+      const [postResult, subscriberResult, subscriberStatsResult, dashboardResult, leadResult] = await Promise.all([
         adminRequest("/blogs/admin/all?limit=100", currentToken),
         adminRequest("/newsletter/subscribers?limit=100", currentToken),
         adminRequest("/newsletter/stats", currentToken),
         adminRequest("/stats/dashboard", currentToken),
+        adminRequest("/leads?limit=100", currentToken),
       ]);
 
       setPosts(postResult.data.blogs || []);
       setSubscribers(subscriberResult.data.subscribers || []);
       setSubscriberStats(subscriberStatsResult.data.stats || {});
       setDashboard(dashboardResult.data || { metrics: {} });
+      setLeads(leadResult.data.leads || []);
 
       try {
         const mailResult = await adminRequest("/newsletter/mail-status", currentToken);
@@ -623,7 +719,7 @@ export default function AdminPanel({ onExit }) {
   useEffect(() => {
     const onPopState = () => {
       const path = window.location.pathname;
-      setActiveTab(path.startsWith("/admin/newsletter") ? "newsletter" : "blogs");
+      setActiveTab(path.startsWith("/admin/queries") ? "queries" : path.startsWith("/admin/newsletter") ? "newsletter" : "blogs");
       if (path === "/admin/create") setEditing("new");
       else {
         const match = path.match(/^\/admin\/edit\/(\d+)$/);
@@ -638,6 +734,9 @@ export default function AdminPanel({ onExit }) {
     window.history.pushState({}, "", path);
     if (path.startsWith("/admin/newsletter")) {
       setActiveTab("newsletter");
+      setEditing(null);
+    } else if (path.startsWith("/admin/queries")) {
+      setActiveTab("queries");
       setEditing(null);
     } else {
       setActiveTab("blogs");
@@ -701,6 +800,18 @@ export default function AdminPanel({ onExit }) {
     }
   }
 
+  async function resolveLead(lead) {
+    try {
+      await adminRequest(`/leads/${lead.id}`, token, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "closed" }),
+      });
+      await loadAdminData();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   if (!token) {
     return (
       <main className="admin-login">
@@ -751,6 +862,8 @@ export default function AdminPanel({ onExit }) {
   }
 
   const metrics = dashboard.metrics || {};
+  const postsOnPage = posts.slice((postPage - 1) * 10, postPage * 10);
+  const postPages = Math.max(1, Math.ceil(posts.length / 10));
 
   return (
     <main className="admin-shell">
@@ -770,9 +883,14 @@ export default function AdminPanel({ onExit }) {
           <Mail size={17} /> Newsletter
           <span>{subscriberStats.active || 0}</span>
         </button>
+        <button className={activeTab === "queries" ? "active" : ""} onClick={() => navigateAdmin("/admin/queries")}>
+          <CheckCircle2 size={17} /> Queries <span>{leads.filter((lead) => lead.status === "new").length}</span>
+        </button>
       </nav>
 
-      {activeTab === "newsletter" ? (
+      {activeTab === "queries" ? (
+        <QueriesPanel leads={leads} loading={loading} onResolve={resolveLead} />
+      ) : activeTab === "newsletter" ? (
         <NewsletterPanel
           token={token}
           subscribers={subscribers}
@@ -807,7 +925,7 @@ export default function AdminPanel({ onExit }) {
           </div>
 
           <div className="post-table">
-            {loading && posts.length === 0 ? <p>Loading posts…</p> : posts.map((post) => (
+            {loading && posts.length === 0 ? <p>Loading posts…</p> : postsOnPage.map((post) => (
               <article key={post.id}>
                 <div className="post-copy">
                   <span>{post.is_published ? "PUBLISHED" : "DRAFT"} · {post.category}</span>
@@ -829,6 +947,7 @@ export default function AdminPanel({ onExit }) {
             ))}
             {!loading && posts.length === 0 && <p className="empty-admin">No posts yet. Create the first one.</p>}
           </div>
+          {postPages > 1 && <div className="admin-pagination"><button disabled={postPage === 1} onClick={() => setPostPage((page) => page - 1)}>Previous</button><span>Page {postPage} of {postPages}</span><button disabled={postPage === postPages} onClick={() => setPostPage((page) => page + 1)}>Next</button></div>}
 
           <div className="admin-footer-note">
             <Users size={16} />

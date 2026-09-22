@@ -41,7 +41,11 @@ function MarkdownContent({ content = "" }) {
     }
 
     flushList();
-    if (line.startsWith("### ")) {
+    if (/^#{1,6}\s+/.test(line)) {
+      const level = Math.min(3, line.match(/^#+/)[0].length);
+      const heading = line.replace(/^#+\s+/, "");
+      blocks.push(level === 2 ? <h2 key={index}>{renderInline(heading)}</h2> : level === 3 ? <h3 key={index}>{renderInline(heading)}</h3> : <h4 key={index}>{renderInline(heading)}</h4>);
+    } else if (line.startsWith("### ")) {
       blocks.push(<h3 key={index}>{renderInline(line.slice(4))}</h3>);
     } else if (line.startsWith("## ")) {
       blocks.push(<h2 key={index}>{renderInline(line.slice(3))}</h2>);
