@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { getPublishedBlogs } from "./api";
 import Header from "./components/Header";
@@ -593,6 +594,7 @@ const blogSlugFromPath = () => {
 
 export default function App() {
   const [page, setPage] = useState(pageFromPath);
+  const [blogSlug, setBlogSlug] = useState(blogSlugFromPath);
   const [blogs, setBlogs] = useState([]);
   const [blogError, setBlogError] = useState("");
   useEffect(() => {
@@ -610,7 +612,10 @@ export default function App() {
     };
   }, []);
   useEffect(() => {
-    const handlePopState = () => setPage(pageFromPath());
+    const handlePopState = () => {
+      setPage(pageFromPath());
+      setBlogSlug(blogSlugFromPath());
+    };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
@@ -628,6 +633,7 @@ export default function App() {
     }
     const path = `/blogs/${encodeURIComponent(slug)}`;
     if (window.location.pathname !== path) window.history.pushState({}, "", path);
+    setBlogSlug(slug);
     setPage("blog");
     window.scrollTo({ top: 0, behavior: "instant" });
   };
@@ -659,7 +665,7 @@ export default function App() {
     ecosystem: <EcosystemPage onPartner={navigatePartner} />,
     leasing: <LeasingPage setPage={navigate} />,
     insights: <Insights blogs={blogs} openBlog={navigateBlog} />,
-    blog: <BlogDetail slug={blogSlugFromPath()} onBack={() => navigate("insights")} onOpen={navigateBlog} />,
+    blog: <BlogDetail key={blogSlug} slug={blogSlug} onBack={() => navigate("insights")} onOpen={navigateBlog} />,
     unsubscribe: <UnsubscribePage onBack={() => navigate("insights")} />,
     offerings: <OfferingsPage setPage={navigate} />,
     contact: (
@@ -678,6 +684,23 @@ export default function App() {
   };
   return (
     <>
+      {page !== "insights" && page !== "blog" && (
+        <Helmet>
+          <title>Syntellos AI | India Go-To-Market Partner for AI Ecosystem Partners</title>
+          <meta name="description" content="Syntellos AI is the India go-to-market and delivery partner for its AI ecosystem partners, bringing production-ready GenAI, computer vision, predictive AI and agentic AI solutions to Indian enterprises." />
+        </Helmet>
+      )}
+      {page === "insights" && (
+        <Helmet>
+          <title>AI, Technology and Industry Insights | Syntellos AI</title>
+          <meta name="description" content="Explore practical guides and industry insights on AI, IoT, robotics, XR and operational technology from Syntellos AI." />
+          <link rel="canonical" href={`${window.location.origin}/blogs`} />
+          <meta property="og:title" content="AI, Technology and Industry Insights | Syntellos AI" />
+          <meta property="og:description" content="Explore practical guides and industry insights on AI, IoT, robotics, XR and operational technology from Syntellos AI." />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={`${window.location.origin}/blogs`} />
+        </Helmet>
+      )}
       {page !== "admin" && <Header page={page} setPage={navigate} onPartner={navigatePartner} />}
       {blogError && page === "insights" && (
         <div className="api-error" role="alert">

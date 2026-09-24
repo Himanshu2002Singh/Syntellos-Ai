@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft, ArrowUpRight, Clock3, Eye, UserRound } from "lucide-react";
 import { getPublishedBlogBySlug } from "../api";
 import Newsletter from "./Newsletter";
@@ -87,12 +88,25 @@ export default function BlogDetail({ slug, onBack, onOpen }) {
   }, [slug]);
 
   if (state.loading) {
-    return <main className="blog-detail-page"><div className="blog-state">Loading article…</div></main>;
+    return (
+      <main className="blog-detail-page">
+        <Helmet>
+          <title>Loading article | Syntellos AI</title>
+          <meta name="description" content="Read technology and industry insights from Syntellos AI." />
+        </Helmet>
+        <div className="blog-state">Loading article…</div>
+      </main>
+    );
   }
 
   if (state.error || !state.blog) {
     return (
       <main className="blog-detail-page">
+        <Helmet>
+          <title>Article unavailable | Syntellos AI</title>
+          <meta name="description" content="This article is currently unavailable. Explore more insights from Syntellos AI." />
+          <meta name="robots" content="noindex" />
+        </Helmet>
         <div className="blog-state">
           <span>ARTICLE UNAVAILABLE</span>
           <h1>We couldn’t load this article.</h1>
@@ -104,8 +118,31 @@ export default function BlogDetail({ slug, onBack, onOpen }) {
   }
 
   const blog = state.blog;
+  const plainText = new DOMParser().parseFromString(
+    (blog.excerpt?.trim() || blog.content || "")
+      .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<[^>]*>/g, " "),
+    "text/html",
+  ).body.textContent || "";
+  const description = plainText
+    .replace(/[#*_`>\[\]]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160) || "Read the latest technology insights from Syntellos AI.";
+  const canonicalUrl = `${window.location.origin}/blogs/${encodeURIComponent(blog.slug || slug)}`;
   return (
     <main className="blog-detail-page">
+      <Helmet>
+        <title>{blog.title} | Syntellos AI</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={`${blog.title} | Syntellos AI`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        {blog.featured_image && <meta property="og:image" content={blog.featured_image} />}
+        <meta name="twitter:card" content={blog.featured_image ? "summary_large_image" : "summary"} />
+      </Helmet>
       <header className="blog-detail-hero">
         <button className="blog-back" onClick={onBack}><ArrowLeft size={16} /> All insights</button>
         <div className="blog-detail-meta">
